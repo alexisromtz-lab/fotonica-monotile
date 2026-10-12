@@ -125,7 +125,9 @@ UNIVERSO = (
     f"T_total={T_TOTAL} a/c, Nt={int(round(T_TOTAL/DT))}, dnu={1.0/T_TOTAL:.4f}; "
     f"umbral de planitud = {UMBRAL} sobre el reparto entre sondas de la misma "
     f"corrida; cola de sonda desde t >= {T_COLA_MIN:g} a/c y residuo de dominio "
-    f"desde t >= {T_COLA_DOM:g} a/c; doble precision; "
+    f"desde t >= {T_COLA_DOM:g} a/c medido SOLO en el interior fisico (celdas de "
+    f"la PML excluidas: ahi el maximo es la onda incidente entrando al "
+    f"absorbente, no un residuo); doble precision; "
     "homogeneo eps_r=1 (NO hay objeto en C1); motor numpy; unidad de conteo = celda; "
     "dos sub-corridas: C1a = cuasi-1D (ny=1, PML solo en x, onda plana -> aqui vive "
     "la dispersion numerica, comparable EXACTA con la formula de Yee) y C1b = 2D real "
@@ -210,6 +212,13 @@ def correr(L_a: float, modo: str) -> dict:
     cola_n = -1
     n_cola = int(round(T_COLA_MIN / DT))
     n_cola_dom = int(round(T_COLA_DOM / DT))
+    # El maximo del dominio se mide SOLO en el interior fisico. Dentro de la PML
+    # el campo maximo es la onda incidente siendo absorbida, no un residuo: con
+    # el dominio entero la cifra quedaba dominada por ella (medido 12-Oct: el
+    # maximo de C1b a t=72 a/c caia dentro de la PML en celda (9, 352)).
+    pml_x = PML_CELDAS if nx > 2 * PML_CELDAS else 0
+    pml_y = PML_CELDAS if ny > 2 * PML_CELDAS else 0
+    vista = (slice(pml_x, nx - pml_x), slice(pml_y, ny - pml_y))
     t0 = time.time()
     for n in range(nt + 1):
         t = n * DT
@@ -233,14 +242,16 @@ def correr(L_a: float, modo: str) -> dict:
         s[0][n] = ez[idx[0], jc]
         s[1][n] = ez[idx[1], jc]
         if n >= n_cola_dom:
-            i_max, j_max = np.unravel_index(int(np.argmax(np.abs(ez))), ez.shape)
-            v = float(np.abs(ez[i_max, j_max]))
+            vi, vj = np.unravel_index(int(np.argmax(np.abs(ez[vista]))),
+                                      ez[vista].shape)
+            v = float(np.abs(ez[pml_x + vi, pml_y + vj]))
             if v > cola_dominio:
                 cola_dominio = v
-                cola_ubi = (int(i_max), int(j_max))
+                cola_ubi = (int(pml_x + vi), int(pml_y + vj))
                 cola_n = int(n)
     transcurrido = time.time() - t0
-    i_fin, j_fin = np.unravel_index(int(np.argmax(np.abs(ez))), ez.shape)
+    fi, fj = np.unravel_index(int(np.argmax(np.abs(ez[vista]))), ez[vista].shape)
+    i_fin, j_fin = int(pml_x + fi), int(pml_y + fj)
     fin_abs = float(np.abs(ez[i_fin, j_fin]))
 
     frec = np.fft.rfftfreq(nt + 1, DT)                    # unidades c/a = nu
@@ -270,6 +281,14 @@ def correr(L_a: float, modo: str) -> dict:
     cola_sonda = float(np.abs(s[1][n_cola:]).max()) / pico2 if pico2 > 0 else float("nan")
     cola_dom = cola_dominio / pico2 if pico2 > 0 else float("nan")
     cola_fin = fin_abs / pico2 if pico2 > 0 else float("nan")
+    # Diagnostico de la HIPOTESIS DEL CAMPO CUASI-ESTATICO: la fuente blanda
+    # tiene DC distinto de cero (integral del pulso = sigma*sqrt(2 pi) > 0), asi
+    # que deposita carga neta y el campo que queda en el interior no es una
+    # reflexion que viaja: es un campo cuasi-estatico cuyo unico sumidero es la
+    # zona de sigma bajo de la PML. Si esa hipotesis es cierta, la media
+    # espacial de Ez sobre el interior (normalizada al pico de la sonda) tiene
+    # el tamano del residuo, no cien veces menos.
+    media_int = float(np.mean(ez[vista])) / pico2 if pico2 > 0 else float("nan")
     reparto_teorico = 1.0 if modo == "C1a" else math.sqrt(D_SONDAS[0] / D_SONDAS[1])
     reparto = A[1] / np.maximum(A[0], 1e-300)
     ln_rep = np.log(reparto)
@@ -304,6 +323,7 @@ def correr(L_a: float, modo: str) -> dict:
         "cola_dominio_t": (cola_n * DT) if cola_n >= 0 else float("nan"),
         "cola_final_celda": [int(i_fin), int(j_fin)],
         "cola_final": cola_fin,
+        "residuo_media_Ez": media_int,
         "pico_sonda": pico2,
     }
 
@@ -393,14 +413,16 @@ def main() -> int:
         )
         Ln.append(
             f"   cola de sonda (t >= {T_COLA_MIN:g} a/c) = {c['cola_sonda']:.3e}  ·  "
-            f"residuo de dominio (t >= {T_COLA_DOM:g} a/c) = {c['cola_dominio']:.3e}"
+            f"residuo de dominio interior (t >= {T_COLA_DOM:g} a/c) = "
+            f"{c['cola_dominio']:.3e}"
         )
         Ln.append(
             f"   residuo localizado: celda {tuple(c['cola_dominio_celda'])} en n = "
             f"{c['cola_dominio_paso']} (t = {c['cola_dominio_t']:.2f} a/c) · maximo "
             f"final = {c['cola_final']:.3e} en celda {tuple(c['cola_final_celda'])} "
             f"(x respecto a la fuente = "
-            f"{(c['cola_final_celda'][0] - I_FUENTE) * DX / A:+.2f} a)"
+            f"{(c['cola_final_celda'][0] - I_FUENTE) * DX / A:+.2f} a) · media "
+            f"espacial de Ez en el interior = {c['residuo_media_Ez']:+.3e}"
         )
     Ln.append("")
     for modo in MODOS:
