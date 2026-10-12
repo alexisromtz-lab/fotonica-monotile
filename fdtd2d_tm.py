@@ -18,13 +18,20 @@ UNIVERSO DECLARADO (se imprime antes de toda cifra):
   doble precision; motor numpy; unidad de conteo = celda.
 
 QUE MIDE C1 (dos sub-corridas, ambas a L = 24a y L = 36a)
-  Dominio HOMOGENEO eps_r = 1 con la misma malla, paso, esponja, fuente y
+  Dominio HOMOGENEO eps_r = 1 con la misma malla, paso, PML, fuente y
   sondas. No hay objeto. Entrega:
     A(L, nu)  = |FFT(sonda)| / |S(omega)|   con |S| = exp(-sigma^2 omega^2 / 2)
     reparto   = A(16a)/A(8a)  (ley 2D: sqrt(8/16) = 0.7071 · en 1D: 1.0000)
     riz       = max_nu |ln reparto - media_nu ln reparto|  -> criterio <= 0.05
     delta     = max_nu |ln A(36a) - ln A(24a)|         -> criterio <= 0.05
     cola      = max|sonda|(t >= 24 a/c) / pico           -> piso de reflexion
+    cola_dom  = max_dominio|Ez|(t >= 24 a/c) / pico      -> residuo FUERA de las
+                sondas; se exporta su celda (i,j), su paso n y el maximo final
+                para LOCALIZARLO, no para juzgarlo: no entra en ningun criterio
+  ESCALA DE A: A no lleva la constante del pulso (sigma*sqrt(2 pi)) ni la
+  amplitud emitida; su escala ABSOLUTA no esta calibrada. Las cuatro
+  predicciones selladas usan cociente entre sondas, diferencia de logaritmos o
+  fase -> son inmunes al factor constante y a la forma de |S| que se use.
   ENMIENDA C1-v2 · por que la planitud se mide sobre el REPARTO y no sobre A:
   en 2D la onda cilindrica impone a A un descenso sistematico ~ nu^(-1/2); su
 desviacion de la media vale ~0.32 y NO es ruido del instrumento, es la ley del
@@ -191,6 +198,8 @@ def correr(L_a: float, modo: str) -> dict:
     hy = np.zeros((nx, ny))
     s = [np.zeros(nt + 1), np.zeros(nt + 1)]
     cola_dominio = 0.0
+    cola_ubi = (-1, -1)
+    cola_n = -1
     n_cola = int(round(T_COLA_MIN / DT))
     t0 = time.time()
     for n in range(nt + 1):
@@ -215,10 +224,15 @@ def correr(L_a: float, modo: str) -> dict:
         s[0][n] = ez[idx[0], jc]
         s[1][n] = ez[idx[1], jc]
         if n >= n_cola:
-            v = float(np.abs(ez).max())
+            i_max, j_max = np.unravel_index(int(np.argmax(np.abs(ez))), ez.shape)
+            v = float(np.abs(ez[i_max, j_max]))
             if v > cola_dominio:
                 cola_dominio = v
+                cola_ubi = (int(i_max), int(j_max))
+                cola_n = int(n)
     transcurrido = time.time() - t0
+    i_fin, j_fin = np.unravel_index(int(np.argmax(np.abs(ez))), ez.shape)
+    fin_abs = float(np.abs(ez[i_fin, j_fin]))
 
     frec = np.fft.rfftfreq(nt + 1, DT)                    # unidades c/a = nu
     fft = [np.fft.rfft(x) * DT for x in s]
@@ -246,6 +260,7 @@ def correr(L_a: float, modo: str) -> dict:
     pico2 = float(np.abs(s[1]).max())
     cola_sonda = float(np.abs(s[1][n_cola:]).max()) / pico2 if pico2 > 0 else float("nan")
     cola_dom = cola_dominio / pico2 if pico2 > 0 else float("nan")
+    cola_fin = fin_abs / pico2 if pico2 > 0 else float("nan")
     reparto_teorico = 1.0 if modo == "C1a" else math.sqrt(D_SONDAS[0] / D_SONDAS[1])
     reparto = A[1] / np.maximum(A[0], 1e-300)
     ln_rep = np.log(reparto)
@@ -275,6 +290,11 @@ def correr(L_a: float, modo: str) -> dict:
         "rama_m": mm,
         "cola_sonda": cola_sonda,
         "cola_dominio": cola_dom,
+        "cola_dominio_celda": [int(cola_ubi[0]), int(cola_ubi[1])],
+        "cola_dominio_paso": cola_n,
+        "cola_dominio_t": (cola_n * DT) if cola_n >= 0 else float("nan"),
+        "cola_final_celda": [int(i_fin), int(j_fin)],
+        "cola_final": cola_fin,
         "pico_sonda": pico2,
     }
 
@@ -365,6 +385,13 @@ def main() -> int:
         Ln.append(
             f"   cola de sonda (t >= {T_COLA_MIN:g} a/c) = {c['cola_sonda']:.3e}  ·  "
             f"cola de dominio = {c['cola_dominio']:.3e}"
+        )
+        Ln.append(
+            f"   residuo localizado: celda {tuple(c['cola_dominio_celda'])} en n = "
+            f"{c['cola_dominio_paso']} (t = {c['cola_dominio_t']:.2f} a/c) · maximo "
+            f"final = {c['cola_final']:.3e} en celda {tuple(c['cola_final_celda'])} "
+            f"(x respecto a la fuente = "
+            f"{(c['cola_final_celda'][0] - I_FUENTE) * DX / A:+.2f} a)"
         )
     Ln.append("")
     for modo in MODOS:
