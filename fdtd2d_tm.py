@@ -183,10 +183,39 @@ def yee_error_fase(nu: np.ndarray) -> np.ndarray:
     return vp / C - 1.0
 
 
-def correr(L_a: float, modo: str) -> dict:
+def correr(L_a: float, modo: str, eps=None) -> dict:
+    # HOOK ACTO 3.1: MATRIZ EPS OPCIONAL EN CORRER Y REGRESION C1
+    # eps=None reproduce EXACTAMENTE el medio homogeneo base (eps_r = 1.0) del
+    # commit previo: es el camino de la regresion C1 bit-identica. Si eps es un
+    # arreglo 2D se valida contra la malla activa (nx, ny), se aplica como
+    # tensor escalar local en la actualizacion de Ez (entra por inv_eps, unico
+    # punto de inyeccion, tal como estaba) y se exige que el borde de la PML
+    # conserve eps_r = 1.0: la conductividad nominal de las capas absorbentes
+    # (perfil_sigma, sin tocar) no se solapa con el objeto. No introduce ningun
+    # parametro nuevo ni mueve ningun umbral.
     nx = int(round(L_a / DX))
     ny = 1 if modo == "C1a" else nx
-    eps = np.ones((nx, ny), dtype=np.float64)      # C1: sin objeto
+    if eps is None:
+        eps = np.ones((nx, ny), dtype=np.float64)      # C1: sin objeto
+    else:
+        eps = np.ascontiguousarray(eps, dtype=np.float64)
+        assert eps.shape == (nx, ny), (
+            f"eps {eps.shape} != malla activa {(nx, ny)}"
+        )
+        px = PML_CELDAS if nx > 2 * PML_CELDAS else 0
+        py = PML_CELDAS if ny > 2 * PML_CELDAS else 0
+        if px or py:
+            borde = np.zeros((nx, ny), dtype=bool)
+            if px:
+                borde[:px, :] = True
+                borde[nx - px:, :] = True
+            if py:
+                borde[:, :py] = True
+                borde[:, ny - py:] = True
+            assert bool(np.all(eps[borde] == 1.0)), (
+                "el borde de la PML debe conservar eps_r = 1.0 (sin solape "
+                "destructivo con la capa absorbente)"
+            )
     inv_eps = 1.0 / eps
     nt = int(round(T_TOTAL / DT))
     jc = ny // 2
