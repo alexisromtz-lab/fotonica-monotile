@@ -301,3 +301,68 @@ gen 6 ⇒ el control midió el **mismo objeto** que el acto.
   copia que parchear ni obsolescencia que declarar. El puntero a este apéndice desde la casa de custodia
   queda **PENDIENTE**: el gate A2.1 no puede crearlo (objetivo inexistente ⇒ RC 10; casa sin git ⇒ RC 14) y
   **no se escribe allí sin orden del dueño**.
+
+---
+
+## §9 · ADENDA DEL ACTO 3 · EL DIELECTRICO EN LA MALLA CERTIFICADA
+
+**Estado:** sellada ANTES de la primera cifra de transmitancia (T_UTC `2026-10-12T16:50Z` · **cero figuras de este acto medidas todavía**). Orden del dueño recibida y aplicada en sustancia: adjudicación de `C(r)`, ensemble de 5 semillas, criterio de `3 sigma`, contraste `eps = 4.0` y definición de resultado negativo. Pre-vuelo A2.1 sobre este archivo: **RC 0** (`52f425e68c3521dccdb4effa0b930d76783414d4` · 303 líneas).
+
+### §9.0 · Nombre y casa (dónde cae el sello)
+
+La orden nombra `PREREGISTRO_FOTONICA_MONOTILE`. Ese nombre tiene dos casas y sólo una tiene árbol git:
+(a) la casa de custodia `/Users/marlene/platino-labs/preregistro-fotonica-monotile-20261011/` (`sha16 47c7c2ef5028ee40`, 17 362 B) — **sin git** ⇒ el gate A2.1 no puede validar identidad allí (RC 14 por diseño, ya declarado en §1); (b) **este archivo**, en `/Users/marlene/fotonica-monotile` (árbol git, HEAD `a8c6410`), que es el pre-registro del instrumento y donde ya viven §2.b y §2.c. **El sello cae aquí**, y el nombre de la orden se registra como alias de este archivo. La copia de custodia queda **PENDIENTE de orden**, igual que el puntero de §2.c.5: no se escribe en una casa sin git ni sin orden.
+
+### §9.1 · Adjudicación de `C(r)`: el hecho, sin narrativa
+
+- El hecho registrado del acto 2: `C(r)` **no discrimina U1 de U2 a este nivel**. Punto.
+- Se **purga** la narrativa causal que lo acompañaba (regularización angular sobre la red subyacente, rotaciones múltiplos de `pi/6`, cancelación de la media angular): era **hipótesis escrita para salvar el número**, es decir la trampa de **adaptar la teoría al dato**. No queda en este archivo como explicación; si alguna vez se mide, será acto propio con su pre-registro.
+- `S(k)` queda **fuera del veredicto** mientras no se defina como observable **con umbral pre-registrado antes de procesar el arreglo**.
+- En este frente el discriminador **único** es la transmitancia espectral `T(nu)`. Ninguna cifra de este acto 3 puede apoyarse en la geometría angular de `C(r)` para explicar una diferencia de `T`.
+
+### §9.2 · Ensemble del nulo U2 (congelado)
+
+UNIVERSO DECLARADO: **5 realizaciones independientes** de U2 · semillas `101 · 102 · 103 · 104 · 105` · **misma fracción de llenado** (`Delta f <= 8.077e-03`) · **mismo número de teselas** (169 hojas de nivel 2, por construcción de la matriz) · mismo instrumento, misma malla, mismas sondas, misma ventana.
+
+- Métrica: media del ensemble `Tbar_U2(nu)` y desviación típica **punto a punto** `sigma_U2(nu)`, sobre los **29 bins** de §9.3.
+- Se reporta además, **por semilla**, la curva cruda `T(nu)`: el ensemble no se resume sólo en `sigma`.
+- **Nota de metro (declarada, no usada):** con `N = 5` la `sigma` muestral tiene una incertidumbre relativa del orden de `1/sqrt(2(N-1)) = 3.536e-01` (35 %). El criterio es el del dueño: se registra **tal cual**, no se toca, y esa incertidumbre **no** se usa para ensanchar ni para estrechar la banda.
+- **Origen del `8.077e-03`:** la orden lo da como tope de `Delta f`; se reproduce como **2 % relativo de la fracción de llenado sellada** `0.403833` ⇒ `0.02 x 0.403833 = 8.0767e-03` (medido). Se declara la derivación para que el número no viaje como constante sin unidad.
+
+### §9.3 · Parámetros físicos (el bypass del medio efectivo)
+
+- `eps_mat = 4.0` · `eps_0 = 1.0` · `Delta eps = 3.0`. Dieléctrico **real y sin pérdidas**: este acto mide estructura, no absorción; no hay parte imaginaria en `eps`.
+- `L = 24 a`: leído como **espesor dieléctrico** (es lo que la orden nombra) y **no** como longitud del dominio. Motivo, y no comodidad: con la lectura «dominio» el espesor lo elegiría yo al colocar la muestra, y con él la física; con `L = 24 a` de espesor el régimen queda fijado por la orden. Las dos lecturas quedan **declaradas** y se adopta la primera.
+- `nu` en `[0.15, 0.55] c/a` — **la ventana exacta de C1**: con `Nt = 2304` (`T_total = 72 a/c`, `DT = 0.03125`) el `rfft` tiene `2305` muestras y paso `dnu = 1/(2305 x 0.03125) = 1.388286e-02`; la ventana realiza los bins `k = 11 .. 39` ⇒ **29 bins** (medido: `nu` realizada de `1.527115e-01` a `5.414317e-01`). Coincide exacto con los **29 bins** de la orden ⇒ el protocolo y el instrumento sellado hablan de la misma rejilla.
+- **Aritmética de `lambda`** (para que el borde del medio efectivo quede escrito ANTES de medir): en `nu = 0.55`, `lambda_vac = 1/0.55 = 1.8182 a` = **29.09 celdas** de `a/16`; dentro del material `lambda_eps4 = 0.9091 a` = **14.54 celdas** — el rasero más fino que la malla debe resolver. En `nu = 0.15`, `lambda_vac = 6.6667 a` = 106.67 celdas.
+- **Régimen (el «bypass»)**: `L / lambda_vac` = **13.20** en `nu = 0.55` y **3.60** en `nu = 0.15`. Un espesor de 3.6 a 13.2 longitudes de onda **no es una lámina delgada** ⇒ el medio efectivo (que forzaría `T_U1 == T_U2` por construcción) **no puede darse por supuesto**, y el contraste `Delta eps = 3.0` es el que la orden fija.
+- **Riesgo de diseño, declarado antes de medir y NO como resultado:** la fracción de llenado está garantizada idéntica (`Delta f <= 8.077e-03`) ⇒ lo único que puede separar U1 de U2 es la **correlación espacial**. Si no la separa en esta ventana, el veredicto es el de §9.4 (negativo) y **no se toca ningún parámetro, ninguna ventana ni ningún umbral para revertirlo**.
+
+### §9.4 · El observable y el criterio (cerrados)
+
+- `T(nu)` := `|E(nu)|` de la **sonda lejana** (la de `16 a`) de la corrida **con muestra**, dividida entre la misma cifra de la corrida **homogénea de referencia**, **mismo instrumento, misma sonda, misma ventana, mismos 29 bins**. La razón cancela la respuesta del instrumento y la dispersión geométrica de la fuente de columna finita: lo que queda es el objeto.
+- **La referencia ya existe y está sellada:** es C1b con `L = 24 a` de la generación 6 (`crudos/crudo_C1_20261012T062648Z.json`, `corridas[2]`, `A_d_2` = amplitud en `16 a`; `sha16 ef29596d00b873b5`, VERDE x4 en §2.c.1). Usar la corrida certificada como denominador es lo más fuerte disponible: el denominador no se re-mide, se **cita**.
+- Criterio (el de la orden, sin tocar): `|T_U1(nu) - Tbar_U2(nu)| > 3 sigma_U2(nu) + riz(T)_C1` en **al menos 3 bins espectrales consecutivos**.
+- **Definición de resultado negativo (escrita antes, vinculante):** si en **toda** la ventana vale `|T_U1 - Tbar_U2| <= 3 sigma_U2 + riz(T)_C1` ⇒ **VEREDICTO NEGATIVO / NULO SOSTENIDO**: la hipótesis (que la correlación espacial del monotilo se distinga en transmisión a este contraste) queda **formalmente refutada en este régimen de contraste**. Se publica como resultado, no como fracaso.
+
+### §9.5 · `riz(T)_C1` — el único parámetro que la orden deja a interpretación, y se resuelve EN CONTRA de este acto
+
+- **El problema:** C1 **no tiene `T`**. C1 es homogéneo (`eps_r = 1`) y mide rizados de `A` y del reparto entre sondas. La cantidad `riz(T)_C1` **no está medida en ninguna parte**.
+- **Dos lecturas posibles:** (a) el **umbral sellado** de C1, `umbral_planitud = 0.05` (llave del crudo gen 6); (b) el **rizado medido** del reparto de C1, que es la cantidad con forma de transmitancia (`reparto = A(16a)/A(8a)`): `riz_reparto_por_modo/C1a = 5.394204639334759e-03` y `C1b = 5.52322568652841e-03` (gen 6, medidos).
+- **Se adopta (a) `0.05`, la mayor.** Motivo declarado: (b) es **9.05 veces menor** que (a) (`0.05 / 0.00552322568652841 = 9.0527`, medido) ⇒ elegir (b) haría el criterio **nueve veces más fácil**, y eso es **mover la perilla hacia el verde**. El criterio debe valer para la lectura **conservadora**.
+- **Es el único lugar de esta adenda donde una elección mía cambia la severidad del criterio.** Queda escrito en voz alta y la lectura descartada queda registrada, con su llave y su valor, para que cualquiera re-corra el acto con el piso alternativo y compare.
+
+### §9.6 · Lo que la orden no fija, y dónde se congela (para que no se decida después de ver la cifra)
+
+La orden fija el criterio y los parámetros físicos; no fija los parámetros de ejecución. Se congelan antes de la primera cifra por dos vías:
+
+1. **La geometría de la corrida se hereda de C1, sin estrenar un solo grado de libertad.** Dominio, malla `dx = a/16`, PML de 20 celdas por borde (`orden 3`, `R0 = 1e-6`, `d = 1.25 a`), fuente de corriente blanda en `(i = 32, j central)`, sondas en posición **absoluta** `8 a` y `16 a`, `T_total = 72 a/c`, `Nt = 2304` y ventana de 29 bins: **todo** eso es lo certificado VERDE x4 en §2.c.1. El acto 3 **no estrena instrumento**: cambia **una sola cosa**, el campo `eps` (que en C1 vale `1` en todas partes). Se elige así por método: un acto que estrena geometría y objeto a la vez no puede atribuir una diferencia a ninguno de los dos.
+2. **Escala y colocación de la muestra.** El campo `eps` se construye **rasterizando la ventana del parche de nivel 2** (la geometría ya sellada en el acto 2) llevando **el lado de su ventana a `24 a`**, con **una celda de la máscara = una celda de Yee** (`a/16`, o sea `384` celdas sobre `24 a`) ⇒ el espesor `L = 24 a` de la orden se cumple **por construcción** y la resolución es **idéntica** a la calibrada en C1a. La máscara se pinta **sólo en el interior físico**: el borde de `20` celdas ocupado por la PML queda con `eps_0 = 1.0` (declarado: un absorbente con material dentro **no es** el absorbente certificado, y su reflexión dejaría de ser la medida).
+3. Ambos viven en la **cabecera de universo declarado** de `inyector_diel.py`, que se **versiona primero** ⇒ quedan congelados por el **blob de git** del módulo, no por la memoria del que corre. Ese es el paso 3 de la orden («devolver el repositorio a la protección estricta de A2.1 antes de lanzar la inyección dieléctrica y las corridas FDTD»).
+
+### §9.7 · Qué NO hace este acto (declarado, no insinuado)
+
+- **No** corre nada: ni una cifra de transmitancia. Esta adenda es texto sellado.
+- **No** construye el nivel 3, ni U3 (hexagonal periódica), ni C2 (Penrose como control positivo).
+- **No** toca el instrumento certificado. Si el acto 3 necesita que el solver consuma un campo `eps` externo, ese cambio es un **acto propio** sobre `fdtd2d_tm.py` (objeto certificado, blob fijado por el gate), va **después** del commit de este inyector, con su propio pre-vuelo y una **re-corrida de C1** que debe reproducir Q1..Q4 VERDE y las amplitudes de gen 6.
+- **No** toca `/Users/marlene/sfqed-paper` (sigue declarado en §7: `sim/maxwell2d.py` `sha16 1db75ea7b0b8cba4`, 715 l, intacto), **no** instala ni deposita tarballs y **no** toca el registro de Zenodo.
