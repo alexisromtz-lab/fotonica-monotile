@@ -25,9 +25,12 @@ QUE MIDE C1 (dos sub-corridas, ambas a L = 24a y L = 36a)
     riz       = max_nu |ln reparto - media_nu ln reparto|  -> criterio <= 0.05
     delta     = max_nu |ln A(36a) - ln A(24a)|         -> criterio <= 0.05
     cola      = max|sonda|(t >= 24 a/c) / pico           -> piso de reflexion
-    cola_dom  = max_dominio|Ez|(t >= 24 a/c) / pico      -> residuo FUERA de las
-                sondas; se exporta su celda (i,j), su paso n y el maximo final
-                para LOCALIZARLO, no para juzgarlo: no entra en ningun criterio
+    cola_dom  = max_dominio|Ez|(t >= 42 a/c) / pico      -> residuo fuera de las
+                sondas, medido cuando el pulso primario YA salio del dominio
+                (t >= 1.17 x 36 a/c). Con la ventana de 24 a/c esta cifra no
+                media un residuo: media el pulso en vuelo (su maximo caia en
+                t = 24.00 a/c, el inicio de la ventana). Se exporta su celda
+                (i,j), su paso n y el maximo final para LOCALIZARLO.
   ESCALA DE A: A no lleva la constante del pulso (sigma*sqrt(2 pi)) ni la
   amplitud emitida; su escala ABSOLUTA no esta calibrada. Las cuatro
   predicciones selladas usan cociente entre sondas, diferencia de logaritmos o
@@ -101,6 +104,10 @@ T_TOTAL = 72.0
 UMBRAL = 0.05
 FACTOR_Q4 = 3.0
 T_COLA_MIN = 24.0            # piso de cola medido desde t >= 24 a/c (1.5 x 16 a/c)
+T_COLA_DOM = 42.0            # residuo de dominio desde t >= 1.17 x 36 a/c: es el
+#   instante en que el pulso primario ya cruzo y salio del dominio mayor. Antes
+#   de eso el maximo del dominio ES el pulso en vuelo, no un residuo (medido:
+#   con la ventana de 24 a/c el maximo caia en t = 24.00 a/c, el propio inicio).
 
 AQUI = Path(__file__).resolve().parent
 CRUDOS = AQUI / "crudos"
@@ -117,7 +124,8 @@ UNIVERSO = (
     f"que la sonda cercana quede a >= 1 lambda: 1/{NU_MIN} = {1.0/NU_MIN:.2f} a); "
     f"T_total={T_TOTAL} a/c, Nt={int(round(T_TOTAL/DT))}, dnu={1.0/T_TOTAL:.4f}; "
     f"umbral de planitud = {UMBRAL} sobre el reparto entre sondas de la misma "
-    f"corrida; cola medida desde t >= {T_COLA_MIN} a/c; doble precision; "
+    f"corrida; cola de sonda desde t >= {T_COLA_MIN:g} a/c y residuo de dominio "
+    f"desde t >= {T_COLA_DOM:g} a/c; doble precision; "
     "homogeneo eps_r=1 (NO hay objeto en C1); motor numpy; unidad de conteo = celda; "
     "dos sub-corridas: C1a = cuasi-1D (ny=1, PML solo en x, onda plana -> aqui vive "
     "la dispersion numerica, comparable EXACTA con la formula de Yee) y C1b = 2D real "
@@ -201,6 +209,7 @@ def correr(L_a: float, modo: str) -> dict:
     cola_ubi = (-1, -1)
     cola_n = -1
     n_cola = int(round(T_COLA_MIN / DT))
+    n_cola_dom = int(round(T_COLA_DOM / DT))
     t0 = time.time()
     for n in range(nt + 1):
         t = n * DT
@@ -223,7 +232,7 @@ def correr(L_a: float, modo: str) -> dict:
         ez = ezx + ezy
         s[0][n] = ez[idx[0], jc]
         s[1][n] = ez[idx[1], jc]
-        if n >= n_cola:
+        if n >= n_cola_dom:
             i_max, j_max = np.unravel_index(int(np.argmax(np.abs(ez))), ez.shape)
             v = float(np.abs(ez[i_max, j_max]))
             if v > cola_dominio:
@@ -384,7 +393,7 @@ def main() -> int:
         )
         Ln.append(
             f"   cola de sonda (t >= {T_COLA_MIN:g} a/c) = {c['cola_sonda']:.3e}  ·  "
-            f"cola de dominio = {c['cola_dominio']:.3e}"
+            f"residuo de dominio (t >= {T_COLA_DOM:g} a/c) = {c['cola_dominio']:.3e}"
         )
         Ln.append(
             f"   residuo localizado: celda {tuple(c['cola_dominio_celda'])} en n = "
