@@ -6,9 +6,10 @@ UNIVERSO DECLARADO (se imprime antes de toda cifra):
   unidades normalizadas a = 1, c = 1, eps0 = mu0 = 1; frecuencia reducida
   nu = omega a / (2 pi c); malla Yee 2D en modo TM (Ez, Hx, Hy) con
   dx = dy = a/16; Courant S = c dt/dx = 0.5 (limite 2D 1/sqrt(2) = 0.7071);
-  esponja de 20 celdas, perfil borde^3, alfa = 0.30 por paso (sin PML: es una
-  esponja declarada y su reflexion ES lo que C1 mide); fuente = pulso gaussiano
-  sigma = 0.5 a/c, t0 = 3 sigma, corriente BLANDA en una sola columna i = 2a;
+  capa absorbente PML de campo partido (Berenger 2D TM) de 20 celdas por borde,
+  sigma(u) = sigma_max u^3 con u = (d-i)/d, sigma_max = -(orden+1) c ln(R0)/(2 d),
+  R0 = 1e-6, d = 1.25 a; fuente = pulso gaussiano
+  sigma = 0.5 a/c, t0 = 3 sigma, corriente BLANDA PUNTUAL en (i = 2a, j central);
   sondas en columnas de posicion ABSOLUTA d = 8a y d = 16a sobre la fila central
   (al crecer L el dominio solo se alarga hacia la derecha); ventana de medida
   nu en [0.15, 0.55] (el borde bajo lo fija que la sonda cercana quede a
@@ -20,20 +21,37 @@ QUE MIDE C1 (dos sub-corridas, ambas a L = 24a y L = 36a)
   Dominio HOMOGENEO eps_r = 1 con la misma malla, paso, esponja, fuente y
   sondas. No hay objeto. Entrega:
     A(L, nu)  = |FFT(sonda)| / |S(omega)|   con |S| = exp(-sigma^2 omega^2 / 2)
-    riz(L)    = max_nu |ln A - media_nu ln A|          -> criterio <= 0.05
-    delta     = max_nu |ln A(36a) - ln A(24a)|         -> criterio <= 0.05
     reparto   = A(16a)/A(8a)  (ley 2D: sqrt(8/16) = 0.7071 · en 1D: 1.0000)
-    cola      = max|sonda|(t > 0.75 T_total) / pico     -> piso de reflexion
-  C1a = cuasi-1D (ny=1, esponja SOLO en x, onda plana): aqui vive la
+    riz       = max_nu |ln reparto - media_nu ln reparto|  -> criterio <= 0.05
+    delta     = max_nu |ln A(36a) - ln A(24a)|         -> criterio <= 0.05
+    cola      = max|sonda|(t >= 24 a/c) / pico           -> piso de reflexion
+  ENMIENDA C1-v2 · por que la planitud se mide sobre el REPARTO y no sobre A:
+  en 2D la onda cilindrica impone a A un descenso sistematico ~ nu^(-1/2); su
+desviacion de la media vale ~0.32 y NO es ruido del instrumento, es la ley del
+  objeto. Medir la planitud sobre A seria ROJO POR CONSTRUCCION en cualquier
+  instrumento correcto. El reparto entre las DOS sondas de la MISMA corrida
+  cancela la normalizacion de la fuente y la tendencia geometrica, y deja lo
+  unico que le importa a una medida de decaimiento: el rizo. El umbral (0.05),
+  la ventana y Q2/Q3/Q4 NO se tocan.
+  C1a = cuasi-1D (ny=1, PML SOLO en x, onda plana): aqui vive la
   dispersion numerica, comparable EXACTA con la formula de Yee, y el piso de
-  reflexion mas afilado. C1b = 2D real (ny=nx, esponja en los cuatro bordes,
-  fuente de columna finita): aqui viven el reparto cilindrico y la dependencia
+  reflexion mas afilado. C1b = 2D real (ny=nx, PML en los cuatro bordes,
+  fuente puntual): aqui viven el reparto cilindrico y la dependencia
   espuria con L en la geometria que el objeto va a usar.
   Y el acompaneante ANALITICO de la malla de Yee
     sin(omega dt/2) = S sin(k dx/2)   ->  v_p = omega/k   -> error de fase.
   El error de fase MEDIDO sale de la diferencia de fase entre las dos sondas
   (k = fase / delta_d) con la convencion de rama declarada: m se elige una sola
   vez en el primer punto de la ventana.
+
+REPARACION v2 (medida, no supuesta)
+  v1 (esponja multiplicativa alfa = 0.30, 20 celdas) dio C1 ROJO en las cuatro
+  predicciones, con DOS causas distintas: (a) en C1a la malla ny=1 deja la fila
+  j=0 fuera del lazo de actualizacion -> sonda EXACTAMENTE 0 en todo t (un cero
+  que no puede diferir no es una medicion); (b) la esponja mide 20 celdas =
+  1.25 a, o sea 0.19 lambda en el borde bajo de la ventana (lambda = 6.67 a):
+  demasiado delgada frente a lambda, su reflexion domina el piso, y ademas el
+  metrico de cola (t > 0.75 T_total) NO veia el rebote que corrompe la ventana.
 
 REGLA DURA
   Un decaimiento solo cuenta POR ENCIMA de este piso. Si C1 no es plano se
@@ -61,9 +79,9 @@ DX = A / 16.0
 DY = DX
 S = 0.5                      # Courant = c dt / dx
 DT = S * DX / C
-ESPONJA = 20
-ALFA = 0.30
-ORDEN = 3
+PML_CELDAS = 20              # capa absorbente (campo partido, Berenger 2D TM)
+PML_ORDEN = 3                # sigma(u) = sigma_max u^orden
+PML_R0 = 1.0e-6              # reflexion objetivo que fija sigma_max
 SIGMA = 0.5
 T0 = 3.0 * SIGMA
 I_FUENTE = int(round(2.0 * A / DX))
@@ -75,7 +93,7 @@ NU_MAX = 0.55
 T_TOTAL = 72.0
 UMBRAL = 0.05
 FACTOR_Q4 = 3.0
-FRACCION_COLA = 0.75
+T_COLA_MIN = 24.0            # piso de cola medido desde t >= 24 a/c (1.5 x 16 a/c)
 
 AQUI = Path(__file__).resolve().parent
 CRUDOS = AQUI / "crudos"
@@ -83,18 +101,20 @@ CRUDOS = AQUI / "crudos"
 UNIVERSO = (
     "unidades normalizadas a=1, c=1, eps0=mu0=1; nu = omega a/(2 pi c); "
     f"malla Yee dx=dy=a/16 ({DX:g}); Courant S={S} (limite 2D "
-    f"{1/math.sqrt(2):.4f}); esponja {ESPONJA} celdas, perfil borde^{ORDEN}, "
-    f"alfa={ALFA}; fuente = pulso gaussiano sigma={SIGMA} a/c, t0={T0} a/c, "
-    f"corriente blanda en la columna i={I_FUENTE}; sondas en posicion ABSOLUTA "
+    f"{1/math.sqrt(2):.4f}); PML campo partido {PML_CELDAS} celdas/borde, "
+    f"sigma_max = -(orden+1)c ln(R0)/(2d) con orden={PML_ORDEN}, R0={PML_R0:g}, "
+    f"d={PML_CELDAS * DX:g} a; fuente = pulso gaussiano sigma={SIGMA} a/c, t0={T0} a/c, "
+    f"corriente blanda puntual en (i={I_FUENTE}, j=central); sondas en posicion ABSOLUTA "
     f"d={D_SONDAS[0]:g}a y d={D_SONDAS[1]:g}a; L en {L_LISTA[0]:g}a y "
     f"{L_LISTA[1]:g}a; ventana nu en [{NU_MIN}, {NU_MAX}] (el borde bajo lo fija "
     f"que la sonda cercana quede a >= 1 lambda: 1/{NU_MIN} = {1.0/NU_MIN:.2f} a); "
     f"T_total={T_TOTAL} a/c, Nt={int(round(T_TOTAL/DT))}, dnu={1.0/T_TOTAL:.4f}; "
-    f"umbral de planitud = {UMBRAL} en |delta ln A|; doble precision; "
+    f"umbral de planitud = {UMBRAL} sobre el reparto entre sondas de la misma "
+    f"corrida; cola medida desde t >= {T_COLA_MIN} a/c; doble precision; "
     "homogeneo eps_r=1 (NO hay objeto en C1); motor numpy; unidad de conteo = celda; "
-    "dos sub-corridas: C1a = cuasi-1D (ny=1, esponja solo en x, onda plana -> aqui vive "
+    "dos sub-corridas: C1a = cuasi-1D (ny=1, PML solo en x, onda plana -> aqui vive "
     "la dispersion numerica, comparable EXACTA con la formula de Yee) y C1b = 2D real "
-    "(ny=nx, esponja en los cuatro bordes, fuente de columna finita -> aqui viven el "
+    "(ny=nx, PML en los cuatro bordes, fuente puntual -> aqui viven el "
     "reparto cilindrico y la dependencia espuria con L)"
 )
 
@@ -104,19 +124,26 @@ def t_utc() -> str:
 
 
 # ------------------------------------------------------------------ instrumento
-def mascara_esponja(nx: int, ny: int, ejes=(0, 1)) -> np.ndarray:
-    m = np.ones((nx, ny), dtype=np.float64)
-    for eje, n in ((0, nx), (1, ny)):
-        if eje not in ejes:
-            continue
-        idx = np.arange(n)
-        borde = np.maximum(
-            np.clip(ESPONJA - idx, 0, ESPONJA),
-            np.clip(idx - (n - 1 - ESPONJA), 0, ESPONJA),
-        ) / float(ESPONJA)
-        s = 1.0 - ALFA * borde ** ORDEN
-        m *= s.reshape((-1, 1) if eje == 0 else (1, -1))
-    return m
+def perfil_sigma(n: int, celdas: int) -> np.ndarray:
+    """Conductividad de la PML por nodo: sigma = sigma_max u^orden, u = (d-i)/d."""
+    celdas = min(celdas, n // 2)
+    s = np.zeros(n, dtype=np.float64)
+    if celdas <= 0:
+        return s
+    d = celdas * DX
+    smax = -(PML_ORDEN + 1) * C * math.log(PML_R0) / (2.0 * d)
+    for k in range(celdas):
+        u = (celdas - k) / float(celdas)
+        s[k] = smax * u ** PML_ORDEN
+        s[n - 1 - k] = s[k]
+    return s
+
+
+def coef_pml(sig: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """Diferencia exponencial: a = exp(-sigma dt), b = (1-a)/sigma (b -> dt si sigma=0)."""
+    a = np.exp(-sig * DT)
+    b = np.where(sig > 0.0, (1.0 - a) / np.where(sig > 0.0, sig, 1.0), DT)
+    return a, b
 
 
 def fuente(t: float) -> float:
@@ -142,36 +169,49 @@ def yee_error_fase(nu: np.ndarray) -> np.ndarray:
 def correr(L_a: float, modo: str) -> dict:
     nx = int(round(L_a / DX))
     ny = 1 if modo == "C1a" else nx
-    ejes = (0,) if modo == "C1a" else (0, 1)
     eps = np.ones((nx, ny), dtype=np.float64)      # C1: sin objeto
     inv_eps = 1.0 / eps
-    m = mascara_esponja(nx, ny, ejes)
     nt = int(round(T_TOTAL / DT))
     jc = ny // 2
     idx = [I_FUENTE + int(round(d / DX)) for d in D_SONDAS]
-    if idx[-1] >= nx - ESPONJA:
+    if idx[-1] >= nx - PML_CELDAS:
         raise SystemExit(
             f"malla L={L_a:g}a demasiado corta para la sonda d={D_SONDAS[-1]:g}a"
         )
-    ez = np.zeros((nx, ny))
+    # --- PML de campo partido: sigma solo en los ejes que absorben ---
+    sx = perfil_sigma(nx, PML_CELDAS)
+    sy = np.zeros(ny) if ny == 1 else perfil_sigma(ny, PML_CELDAS)
+    ax_e, bx_e = coef_pml(sx)                       # componente x de Ez, en nodos i
+    ay_e, by_e = coef_pml(sy)                       # componente y de Ez, en nodos j
+    ax_h, bx_h = coef_pml(0.5 * (sx[:-1] + sx[1:]))  # Hy en (i+1/2, j)
+    ay_h, by_h = coef_pml(0.5 * (sy[:-1] + sy[1:]))  # Hx en (i, j+1/2)
+    ezx = np.zeros((nx, ny))
+    ezy = np.zeros((nx, ny))
     hx = np.zeros((nx, ny))
     hy = np.zeros((nx, ny))
     s = [np.zeros(nt + 1), np.zeros(nt + 1)]
     cola_dominio = 0.0
-    n_cola = int(round(FRACCION_COLA * nt))
-    kh = DT / DY
+    n_cola = int(round(T_COLA_MIN / DT))
     t0 = time.time()
     for n in range(nt + 1):
         t = n * DT
-        hx[:, :-1] -= kh * (ez[:, 1:] - ez[:, :-1])
-        hy[:-1, :] += kh * (ez[1:, :] - ez[:-1, :])
-        ez[1:, 1:] += DT * inv_eps[1:, 1:] * (
-            (hy[1:, 1:] - hy[:-1, 1:]) / DX - (hx[1:, 1:] - hx[1:, :-1]) / DY
-        )
-        ez[I_FUENTE, :] += fuente(t)
-        ez *= m
-        hx *= m
-        hy *= m
+        ez = ezx + ezy
+        hy[:-1, :] = (ax_h[:, None] * hy[:-1, :]
+                      + bx_h[:, None] * (ez[1:, :] - ez[:-1, :]) / DX)
+        hx[:, :-1] = (ay_h[None, :] * hx[:, :-1]
+                      - by_h[None, :] * (ez[:, 1:] - ez[:, :-1]) / DY)
+        if ny == 1:
+            ezx[1:, 0] = (ax_e[1:] * ezx[1:, 0]
+                          + bx_e[1:] * inv_eps[1:, 0] * (hy[1:, 0] - hy[:-1, 0]) / DX)
+        else:
+            ezx[1:, 1:] = (ax_e[1:, None] * ezx[1:, 1:]
+                           + bx_e[1:, None] * inv_eps[1:, 1:]
+                           * ((hy[1:, 1:] - hy[:-1, 1:]) / DX))
+            ezy[1:, 1:] = (ay_e[None, 1:] * ezy[1:, 1:]
+                           - by_e[None, 1:] * inv_eps[1:, 1:]
+                           * ((hx[1:, 1:] - hx[1:, :-1]) / DY))
+        ezx[I_FUENTE, jc] += fuente(t)
+        ez = ezx + ezy
         s[0][n] = ez[idx[0], jc]
         s[1][n] = ez[idx[1], jc]
         if n >= n_cola:
@@ -191,7 +231,12 @@ def correr(L_a: float, modo: str) -> dict:
     # --- fase medida entre las dos sondas (convencion de rama declarada) ---
     dd = D_SONDAS[1] - D_SONDAS[0]
     om = 2.0 * math.pi * nu
-    ang = np.unwrap(np.angle(fft[1][sel] * np.conj(fft[0][sel])))
+    # Convencion declarada: la sonda es una senal REAL, y el rfft de una onda
+    # que viaja en +x cumple phi(x) = -k x. Se toma el desfase como
+    # phi(8a) - phi(16a) = +k dd, para que k crezca con nu. v1 tomaba
+    # phi(16a) - phi(8a) = -k dd y forzaba despues la rama m positiva: la rama
+    # enmascaraba el cambio de signo y k salia +0.61 donde vale +0.94.
+    ang = np.unwrap(np.angle(fft[0][sel] * np.conj(fft[1][sel])))
     mm = float(np.round((om[0] / C * dd - ang[0]) / (2.0 * math.pi)))
     k = (ang + 2.0 * math.pi * mm) / dd
     fase_err = np.divide(
@@ -202,6 +247,8 @@ def correr(L_a: float, modo: str) -> dict:
     cola_sonda = float(np.abs(s[1][n_cola:]).max()) / pico2 if pico2 > 0 else float("nan")
     cola_dom = cola_dominio / pico2 if pico2 > 0 else float("nan")
     reparto_teorico = 1.0 if modo == "C1a" else math.sqrt(D_SONDAS[0] / D_SONDAS[1])
+    reparto = A[1] / np.maximum(A[0], 1e-300)
+    ln_rep = np.log(reparto)
 
     return {
         "modo": modo,
@@ -217,9 +264,12 @@ def correr(L_a: float, modo: str) -> dict:
         "lnA_d_2": lnA[1].tolist(),
         "riz_d_1": float(np.abs(lnA[0] - lnA[0].mean()).max()),
         "riz_d_2": float(np.abs(lnA[1] - lnA[1].mean()).max()),
-        "reparto_media": float(np.mean(A[1] / A[0])),
-        "reparto_desv_max": float(np.abs(A[1] / A[0] - reparto_teorico).max()),
+        "reparto_media": float(np.mean(reparto)),
+        "reparto_desv_max": float(np.abs(reparto - reparto_teorico).max()),
         "reparto_teorico": reparto_teorico,
+        "reparto_riz": float(np.abs(ln_rep - ln_rep.mean()).max()),
+        "reparto_min": float(reparto.min()),
+        "reparto_max": float(reparto.max()),
         "fase_error": fase_err.tolist(),
         "fase_error_max": float(np.abs(fase_err).max()),
         "rama_m": mm,
@@ -261,9 +311,14 @@ def main() -> int:
         b = np.array(por[(modo, L_LISTA[1])]["lnA_d_2"])
         deltas[modo] = float(np.abs(b - a).max())
     salida["delta_lnA_36_vs_24"] = deltas
-    riz_max = max(max(c["riz_d_1"], c["riz_d_2"]) for c in salida["corridas"])
-    salida["riz_max"] = riz_max
-    salida["Q1_riz_ok"] = bool(riz_max <= UMBRAL)
+    riz_r = {m: max(por[(m, L)]["reparto_riz"] for L in L_LISTA) for m in MODOS}
+    salida["riz_reparto_por_modo"] = riz_r
+    salida["riz_lnA_diagnostico"] = [
+        {"modo": c["modo"], "L_a": c["L_a"],
+         "riz_d_1": c["riz_d_1"], "riz_d_2": c["riz_d_2"]}
+        for c in salida["corridas"]
+    ]
+    salida["Q1_riz_ok"] = bool(max(riz_r.values()) <= UMBRAL)
     salida["Q2_delta_ok"] = bool(max(deltas.values()) <= UMBRAL)
     desv = {m: max(por[(m, L)]["reparto_desv_max"] for L in L_LISTA) for m in MODOS}
     salida["reparto_desv_max_por_modo"] = desv
@@ -294,19 +349,21 @@ def main() -> int:
             f"{c['nt']} pasos · {c['segundos_corrida']} s"
         )
         Ln.append(
-            f"   riz(d={D_SONDAS[0]/A:g}a) = {c['riz_d_1']:.6f}   "
-            f"riz(d={D_SONDAS[1]/A:g}a) = {c['riz_d_2']:.6f}"
-        )
-        Ln.append(
             f"   reparto A({D_SONDAS[1]/A:g}a)/A({D_SONDAS[0]/A:g}a) = "
             f"{c['reparto_media']:.6f}  (teorico {c['reparto_teorico']:.6f}, "
-            f"desv max {c['reparto_desv_max']:.6f})"
+            f"desv max {c['reparto_desv_max']:.6f}, rango "
+            f"{c['reparto_min']:.6f}..{c['reparto_max']:.6f})"
+        )
+        Ln.append(
+            f"   riz del reparto = {c['reparto_riz']:.6f}   [diagnostico] "
+            f"riz de ln A(d={D_SONDAS[0]/A:g}a) = {c['riz_d_1']:.6f} · "
+            f"riz de ln A(d={D_SONDAS[1]/A:g}a) = {c['riz_d_2']:.6f}"
         )
         Ln.append(
             f"   fase: error max = {c['fase_error_max']:.6e}  ·  rama m = {c['rama_m']:.0f}"
         )
         Ln.append(
-            f"   cola de sonda (t > {FRACCION_COLA:g} T) = {c['cola_sonda']:.3e}  ·  "
+            f"   cola de sonda (t >= {T_COLA_MIN:g} a/c) = {c['cola_sonda']:.3e}  ·  "
             f"cola de dominio = {c['cola_dominio']:.3e}"
         )
     Ln.append("")
@@ -319,7 +376,11 @@ def main() -> int:
     )
     Ln.append("")
     Ln.append("---- predicciones selladas en el pre-registro (§6.b) ----")
-    Ln.append(f"Q1 riz <= {UMBRAL}: {'VERDE' if salida['Q1_riz_ok'] else 'ROJO'}")
+    Ln.append(
+        f"Q1 riz(reparto) <= {UMBRAL} en C1a y C1b: "
+        f"{'VERDE' if salida['Q1_riz_ok'] else 'ROJO'}"
+        f"  [C1a {riz_r['C1a']:.6f} · C1b {riz_r['C1b']:.6f}]"
+    )
     Ln.append(f"Q2 delta <= {UMBRAL}: {'VERDE' if salida['Q2_delta_ok'] else 'ROJO'}")
     Ln.append(
         f"Q3 reparto (2D 0.7071 · 1D 1.0000) +- {UMBRAL}: "
