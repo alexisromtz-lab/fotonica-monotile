@@ -366,3 +366,50 @@ La orden fija el criterio y los parámetros físicos; no fija los parámetros de
 - **No** construye el nivel 3, ni U3 (hexagonal periódica), ni C2 (Penrose como control positivo).
 - **No** toca el instrumento certificado. Si el acto 3 necesita que el solver consuma un campo `eps` externo, ese cambio es un **acto propio** sobre `fdtd2d_tm.py` (objeto certificado, blob fijado por el gate), va **después** del commit de este inyector, con su propio pre-vuelo y una **re-corrida de C1** que debe reproducir Q1..Q4 VERDE y las amplitudes de gen 6.
 - **No** toca `/Users/marlene/sfqed-paper` (sigue declarado en §7: `sim/maxwell2d.py` `sha16 1db75ea7b0b8cba4`, 715 l, intacto), **no** instala ni deposita tarballs y **no** toca el registro de Zenodo.
+
+---
+
+### §9.8 · ERRATA DE UNIDAD EN §9.2 Y DECLARACIONES DE PRE-RUN DEL ACTO 3
+
+**Estado:** sellada ANTES de la primera cifra del acto 3 (cero corridas FDTD lanzadas, cero cifras de `T(nu)` medidas). Pre-vuelo A2.1 sobre este archivo: **RC 0** (`5482a3105541413d4388ec3e72425a8b6e178b22` · 368 líneas · T_UTC `2026-10-12T16:56:45Z`). **No edita §9.2**: la pieza sellada se cita, recibe apéndice.
+
+**Comando y hora de todo lo que sigue (unidad declarada en cada línea):** `malla_hat.u1(2, 384)`, `malla_hat.u2(polis1, teselas, ven, 384, cobertura_U1, semilla, 24)`, `malla_hat.rasterizar(polis, *ven, 384)`, corridos desde `/Users/marlene/fotonica-monotile` en T_UTC `2026-10-12T16:55:36Z` a `16:55:51Z` (15.3 s), **sin escritura en disco**.
+
+### §9.8.1 · ERRATA: «169 hojas de nivel 2» es la cuenta de UNA especie, no el número de teselas
+
+§9.2 escribe «mismo número de teselas (169 hojas de nivel 2, por construcción de la matriz)». La frase es **falsa en su unidad**. Medido, en dos unidades distintas y **las dos verdaderas**:
+
+- **unidad tesela** (hojas del parche de nivel 2, que es la unidad que la inyección consume): `u1(2, 384)["n_teselas"] = 3603`.
+- **unidad metatile**: `certificado_matriz(2)` da `hojas_por_metatile = (169, 25, 96, 112)` = **402** hojas dentro de **un** metatil `H` de nivel 2; el `169` es **sólo la especie `H`**.
+
+⇒ El `169` no es el número de teselas del parche: es una especie dentro de un metatil. La igualdad que la orden pide («mismo número de teselas») se cumple en la unidad **3603**, y se cumple **por construcción**: U2 recibe `polis1` y `teselas` de U1 y no añade ni quita ninguna (medido: `len(polis2) = 3603` en **5 de 5** semillas). Corregido aquí; §9.2 se cita, no se edita.
+
+### §9.8.2 · `Delta f <= 8.077e-03` es IDENTIDAD, no medición (declarado antes de correr)
+
+Medido en las cinco semillas: `|suma_areas(U2) - suma_areas(U1)|` = `2.165e-15` · `2.165e-15` · `9.437e-16` · `1.721e-15` · `2.220e-15`; `areas_max_dif_vs_U1 <= 1.819e-12`; `n_vertices_igual = True` en 5 de 5. La razón es **estructural**, no estadística: (a) todas las hojas del parche de nivel 2 son **congruentes** — `area_tesela min = media = max = 3.464101615 u^2`, `det(T)` en `-0.25` a `+0.25`, `n_vertices_por_tesela = 13` — y (b) U2 lleva cada hoja a su centroide y la gira (`ca, sa = cos(-th), sin(-th)`), que es una **isometría**: conserva el multiconjunto de áreas. ⇒ `suma_areas(U2) = suma_areas(U1)` se cumple a precisión de máquina **por construcción**, y el tope de la orden (`8.077e-03`) queda **doce órdenes de magnitud** por encima del residuo (margen `8.077e-03 / 2.220e-15` = `3.64e+12`).
+
+**Declarado: un criterio que no puede fallar no es evidencia.** El contenido real del ensemble de 5 semillas es **otro**, y se declara aquí: la variabilidad es **espacial**, no de densidad. Medido, la variabilidad que sí existe (unidad: celda de malla, malla de `384x384` = `147456` celdas):
+
+- `sha16_mascara` de U2 = `179ae0c14aa17dcf` · `45f2005002d61167` · `5828f010ce8871a0` · `555a5f97a30ae3fb` · `fab54ca3573d844c` ⇒ **5 de 5 distintas**.
+- celdas donde la máscara U2 difiere de la de U1: `69807` · `69700` · `69985` · `70190` · `70026` (media `69941.6`, **`47.4 %` de la malla**); índice de Jaccard unión-contra-unión `0.248296` · `0.250570` · `0.247700` · `0.247018` · `0.247137`.
+- `d_elegido` = `3.045985824 u` en **5 de 5** (dispersión `0.000e+00`) y `descartes_de_reticulo` = `225` en **5 de 5** ⇒ el barrido **no** depende de la semilla: la semilla mueve **el reparto**, no la densidad.
+
+⇒ `Tbar_U2(nu)` y `sigma_U2(nu)` miden dispersión de **reparto** sobre máscaras que difieren en la mitad de sus celdas. Eso es lo que `sigma_U2` puede y **no** puede significar: **no** es el ruido de una familia de densidades (ésas son idénticas por construcción) — es la dispersión de una familia de **arreglos con la misma área**.
+
+### §9.8.3 · RESOLUCIÓN REALIZADA: la arista más fina mide 1.09 celdas (declarado antes de correr)
+
+Mapeo de escala: el lado de la ventana del parche de nivel 2 mide `lado = 175.803156968241 u` y se lleva a `24 a` con `n = 384` celdas ⇒ `celda de malla = 0.457820721 u` ⇒ **`1 u = 2.184261 celdas de Yee = 0.136516 a`**. Medido sobre las `3603` hojas (unidad: unidad `u` y celda de Yee):
+
+- **arista**: min = `0.500000000 u` = **`1.0921` celdas** · media = `1.5451` celdas · max = `2.1843` celdas.
+- **ancho** (lado mayor del rectángulo envolvente de la hoja): min = `2.598076211 u` = `5.6749` celdas · media = `5.9680` celdas · max = `6.5528` celdas.
+- La máscara **conserva el área**: cubre `59525` celdas contra `59548` celdas-equivalente de suma de áreas de polígono (`Delta = 23` celdas; `cobertura 0.403679742` contra `suma_areas 0.403832758`), con `solape` U1 = `2.0345052083e-05`.
+
+⇒ **Declarado: la densidad está resuelta (unas 6 celdas por tesela) y el borde no** (la arista más fina mide `1.09` celdas, por debajo de las `2` celdas que harían falta para representar un vértice interior). La máscara representa el **reparto** y la **densidad** de la red; **no** representa su contorno fino.
+
+**Asimetría declarada antes de medir:** un **POSITIVO es seguro** (un efecto que sobrevive a una máscara sub-resuelta es efecto del reparto), un **NEGATIVO no es atribuible por completo a la geometría** — puede ser el rasterizador. Y **no se mueve ningún parámetro para repararlo**: la orden fijó `L = 24 a` y la resolución de C1a en §9.6.2, y un acto que estrena geometría y objeto a la vez no puede atribuir una diferencia a ninguno de los dos.
+
+### §9.8.4 · LA ASIMETRÍA DE COBERTURA DE UNIÓN ES EXPLICACIÓN ALTERNATIVA DE UN POSITIVO
+
+Medido (adimensional; unidad: celda sobre el total de la malla): cobertura de la **unión** de U1 = `0.403679742`; de los cinco U2 = `0.382473416` · `0.385084364` · `0.383477105` · `0.384636773` · `0.382995605` ⇒ diferencia contra U1 = `2.1206e-02` · `1.8595e-02` · `2.0203e-02` · `1.9043e-02` · `2.0684e-02` (**2 % relativo**). La `suma_areas` (suma de áreas contando solape) es idéntica (§9.8.2), pero **la unión no**: U2 solapa (`solape_U2 = 0.016994900` en el crudo de la semilla por omisión) y U1 casi no (`2.03e-05`) ⇒ **en la malla, U1 y U2 no presentan la misma cantidad de dieléctrico**.
+
+⇒ Declarado antes de correr: si `|T_U1(nu) - Tbar_U2(nu)|` supera el criterio, «el reparto» **no** es la única explicación disponible; la otra es «U1 y U2 no tienen la misma cantidad de dieléctrico en la malla». El veredicto se emite con **las dos lecturas nombradas**; ninguna de las dos se elige después de ver la cifra.
