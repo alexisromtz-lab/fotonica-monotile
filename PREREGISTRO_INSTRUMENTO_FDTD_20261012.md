@@ -196,3 +196,108 @@ la §2 tal como quedó **no podía medir lo que dice medir**, y se declara por q
 - **Q2** `delta = max_nu |ln A(36a) - ln A(24a)| <= 0.05` en `C1a` y en `C1b`.
 - **Q3** `A(16a)/A(8a) = 0.7071 +- 0.05` en `C1b` (en `C1a` el valor teórico es `1.000`).
 - **Q4** `max |error de fase medido| <= 3 · max |error de Yee|` en la ventana, medido en `C1a`.
+
+---
+
+## §2.c · ENMIENDA POST-CORRIDA (T_UTC 2026-10-12T06:37Z · **seis crudos medidos** · umbral `0.05`, ventana `nu` de §2.b.1, sondas de §2.b.2, Q1, Q2 y Q3 **NO se tocaron**)
+
+UNIVERSO DECLARADO: este apéndice se mide sobre los **seis** crudos de `crudos/` (`.json` + `.txt`), el
+árbol git de esta casa (**5** commits) y este mismo archivo; **unidad de conteo = celda**; hora de cada
+cifra = la de su crudo. El acto 1 corrió **antes** de este apéndice: aquí no se predice, se declara lo
+medido. §2.b sigue siendo verdadero **en su propia hora** («cero figuras medidas todavía») y **no se edita**.
+
+### §2.c.1 · Veredicto del acto 1 (gen 6, medido)
+
+`Q1 riz <= 0.05 en C1a y C1b: VERDE [C1a 0.005394 · C1b 0.005523]` ·
+`Q2 delta = max_nu |ln A(36a) - ln A(24a)| <= 0.05 en C1a y C1b: VERDE [0.004548 · 0.006001]` ·
+`Q3 reparto (2D 0.7071 · 1D 1.0000) +- 0.05: VERDE [C1a/24a 0.999907 · C1a/36a 1.000055 ·
+C1b/24a 0.707449 · C1b/36a 0.707223]` ·
+`Q4 fase medida 1.405e-03 <= 3 x Yee 1.463133e-03 = 4.389e-03: VERDE` (rama `m = 1`).
+Acompañante analítico de §4: **1.463133e-03**. La condición de la l.160 de este archivo
+(«**Condición de entrada al acto 2:** Q1..Q4 en verde») queda **cumplida**: el acto 2 queda **habilitado**,
+no corrido. Cola de sonda del acto: `2.784e-03 · 2.636e-03 · 2.283e-02 · 2.283e-02`.
+
+### §2.c.2 · Los SIETE defectos diagnosticados (mismo número que §2.b, otra causa)
+
+Cada uno con su **testigo medido**; ninguno se repara tocando un umbral.
+
+- **(a) Fila `j = 0` nunca escrita.** Con `ny = 1` el stencil de C1a escribía sólo `ez[1:, 1:]`. Testigo:
+  gen 1, `cola de sonda (t > 0.75 T) = nan` en **las dos** corridas de C1a.
+- **(b) Esponja multiplicativa de 1.25 a** = 0.19–0.69 longitudes de onda en la ventana: reflexión de orden
+  `0.1–1`, es decir del tamaño del objeto. Reparado con **PML de campo partido (Berenger)**, 20 celdas por
+  borde, orden 3, reflexión nominal `1.0e-06` ⇒ el absorbente pasa de objeto a frontera declarada.
+- **(c) `FRACCION_COLA = 0.75`** era ciego al rebote que entra alrededor de `t = 28 a/c` ⇒ `T_COLA_MIN = 24.0 a/c`
+  (1.5 x el cruce completo de la sonda lejana a 16a).
+- **(d) Q1 tal como se selló era insatisfacible en C1b** (`A(8a)/A(4a)` con decaimiento cilíndrico `(k r)^(-1/2)`).
+  Q1 se redefinió sobre `reparto`, **antes de correr** (§6.b).
+- **(e) La rama de fase enmascaraba un cambio de signo.** La señal es **real** ⇒ la fase va como `-k d`; el
+  código tomaba la diferencia y forzaba después `m >= 0`, con lo que `k` salía `+0.61` donde vale `+0.94`.
+  Testigo: gen 2, `Q4 fase medida 7.495e+03`. Reparado con `fft[0] cdot conj(fft[1])` y la convención de
+  §2.b.4 declarada. **Control**: gen 2 → gen 3, las **cuatro** colas de sonda quedaron **idénticas**
+  (`2.784e-03 · 2.636e-03 · 2.283e-02 · 2.283e-02`) ⇒ la reparación tocó la fase, no el campo.
+- **(f) La «cola de dominio» medía el PULSO PRIMARIO EN VUELO.** Con la ventana en `24 a/c` el máximo del
+  dominio caía en `n = 768` ⇒ `t = 24.00 a/c`, **el propio primer paso de la ventana**. Testigo: gen 4,
+  celdas `(375,0) n=768` · `(392,0) n=769` · `(352,18) n=768` · `(334,84) n=768`. Reparado con
+  `T_COLA_DOM = 42.0 a/c` (= 1.17 x el cruce completo de `36 a/c`), declarado en docstring, constante,
+  UNIVERSO e impresión. **Control de que se movió la métrica y no el objeto**: los **cuatro máximos
+  finales** de gen 4 y gen 5 son **idénticos** — `2.841e-04 (74,0)` · `2.877e-04 (74,0)` · `3.721e-03 (9,352)` ·
+  `5.265e-03 (6,17)` — mientras el residuo de ventana cayó `3.671e-02 → 2.780e-03` · `9.979e-01 → 2.727e-03` ·
+  `8.501e-01 → 8.289e-03` · `8.533e-01 → 3.905e-02` (factores 13.2 · 366 · 102.6 · 21.9).
+- **(g) La cola de dominio incluía las celdas de la PML**, donde el máximo es la onda incidente **entrando**
+  al absorbente, no un residuo (el continente, no el objeto). Reparado con ventana **solo interior**:
+  `vista = (slice(pml_x, nx - pml_x), slice(pml_y, ny - pml_y))`. Medido (gen 5 → gen 6):
+  `C1b/24a 8.289e-03 → 7.728e-03` · `C1b/36a 3.905e-02 → 3.292e-02` · máximos finales
+  `3.721e-03 → 2.522e-03` y `5.265e-03 → 2.899e-03` · **C1a sin cambio** (`2.780e-03` / `2.727e-03`;
+  `2.841e-04` / `2.877e-04`): la corrección quitó el continente, no el objeto.
+
+### §2.c.3 · Las seis generaciones de crudo (identidad medida, no atribuida)
+
+El instrumento declarado dentro de cada crudo `sha16` **coincide** con `shasum -a 256` del archivo en su
+commit (incluido HEAD en disco) ⇒ la identidad de cada corrida está **medida**, no inferida.
+
+| gen | T_UTC | instrumento `sha16` | commit | ventana de dominio | veredicto |
+|---|---|---|---|---|---|
+| 1 | `055738Z` | `4251c1e0119afc8b` | `92834c4` | `t > 0.75 T` | **ROJO x4** |
+| 2 | `061015Z` | `b19ea19ff70d080e` | (sin commit) | `24 a/c` | Q1–Q3 VERDE · **Q4 ROJO `7.495e+03`** |
+| 3 | `061218Z` | `2b2056c6b83b1172` | `4e141af` | `24 a/c` | **VERDE x4** |
+| 4 | `061815Z` | `c49c6a4de7224d4a` | `d64dc6d` | `24 a/c` (= `T_COLA_MIN`, sin constante propia) | VERDE x4 |
+| 5 | `062245Z` | `406a51cfb85ccc10` | `d0bdc52` | `42 a/c` (`T_COLA_DOM`) | VERDE x4 |
+| 6 | `062648Z` | `ef29596d00b873b5` | `0e93ff9` | `42 a/c`, **solo interior** | **VERDE x4** |
+
+El gen 1 reporta `cola de dominio = nan` en C1a (el defecto (a)) y `1.097e-02` · `4.542e-02` en C1b; el gen 2
+es la primera corrida de la v2 (reparación de fase aún sin aplicar) y no produjo commit propio.
+
+### §2.c.4 · El control sin escritura en la casa (el residuo decae; no hay piso de PML)
+
+Control en `/tmp/control_cola_decay.py`, **cero escrituras en esta casa** y **no está en custodia** (se cita
+por su comando: `cd /tmp && python3 -B control_cola_decay.py`). Su cabecera declara
+`UNIVERSO DECLARADO: 2 modos x L=24a x T_total en {72, 120, 180} a/c = 6 corridas`, y **no toca ningún
+parámetro sellado**. Máximo final del **interior** con `T_total` = 72 / 120 / 180:
+
+- `C1a: 2.841471e-04 → 2.259444e-04 → 1.874690e-04` (razones 0.7952 · 0.8297)
+- `C1b: 2.521848e-03 → 1.445774e-03 → 1.102982e-03` (razones 0.5733 · 0.7629)
+
+Decae **monótono** a lo largo de 108 `a/c` **sin piso**, con residuo de ventana y cola de sonda idénticos en
+las tres `T` (`tau` de la razón medida = `48 a/c / |ln razon|` ⇒ `86–257 a/c`) ⇒ **no es un piso de reflexión
+de la PML**. El primer punto del control (C1a `2.841471e-04` · C1b `2.521848e-03`) **reproduce** el crudo del
+gen 6 ⇒ el control midió el **mismo objeto** que el acto.
+
+### §2.c.5 · Lo que NO se tocó, y una hipótesis REFUTADA
+
+- **No tocado:** el umbral `0.05` · la ventana `nu` de §2.b.1 · las sondas absolutas `8a` y `16a` de §2.b.2 ·
+  las dos sub-corridas de §2.b.3 · Q1, Q2 y Q3. Las tres reparaciones ((e) fase, (f) ventana, (g) interior)
+  **no cambiaron un solo veredicto**: la re-verificación en gen 5 y gen 6 volvió a dar Q1..Q4 **VERDE**.
+- **Hipótesis refutada (por medición, no por argumento):** el componente de continua de la corriente blanda
+  (`integral del pulso = sigma sqrt(2 pi) = 1.2533`; medido `≈ 1.25`) **no** explica el residuo. Media
+  espacial de `Ez` en el interior / `pico2` (gen 6): `C1a -3.190e-07` · `+5.379e-07` · `C1b -8.242e-04` ·
+  `-9.180e-04`, es decir `~1e-4` del residuo en C1a, y un campo estático **no** decaería como decae.
+- **No adjudicado:** la **identidad** del residuo (contenido débil de `nu` baja absorbido despacio, esquina
+  de la PML, o ambos). Lo medido es que **decae, no tiene piso y no crece con `L`**; adjudicarlo exigiría un
+  acto propio, y no se hace aquí.
+- **Custodia (medida, 06:36Z):** la casa de custodia `/Users/marlene/platino-labs` **no tiene árbol git**
+  (gate A2.1 ⇒ RC 14, fail-closed por diseño, ya declarado en §1) y su carpeta
+  `preregistro-fotonica-monotile-20261011/` contiene `PREREGISTRO_FOTONICA_MONOTILE_20261011.md`
+  (`sha16 47c7c2ef5028ee40`, 17362 B) · 3 sondas · `crudos/`: **no contiene copia de este archivo** ⇒ no hay
+  copia que parchear ni obsolescencia que declarar. El puntero a este apéndice desde la casa de custodia
+  queda **PENDIENTE**: el gate A2.1 no puede crearlo (objetivo inexistente ⇒ RC 10; casa sin git ⇒ RC 14) y
+  **no se escribe allí sin orden del dueño**.
