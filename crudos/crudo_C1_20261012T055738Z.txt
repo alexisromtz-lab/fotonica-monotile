@@ -1,0 +1,67 @@
+UNIVERSO DECLARADO: unidades normalizadas a=1, c=1, eps0=mu0=1; nu = omega a/(2 pi c); malla Yee dx=dy=a/16 (0.0625); Courant S=0.5 (limite 2D 0.7071); esponja 20 celdas, perfil borde^3, alfa=0.3; fuente = pulso gaussiano sigma=0.5 a/c, t0=1.5 a/c, corriente blanda en la columna i=32; sondas en posicion ABSOLUTA d=8a y d=16a; L en 24a y 36a; ventana nu en [0.15, 0.55] (el borde bajo lo fija que la sonda cercana quede a >= 1 lambda: 1/0.15 = 6.67 a); T_total=72.0 a/c, Nt=2304, dnu=0.0139; umbral de planitud = 0.05 en |delta ln A|; doble precision; homogeneo eps_r=1 (NO hay objeto en C1); motor numpy; unidad de conteo = celda; dos sub-corridas: C1a = cuasi-1D (ny=1, esponja solo en x, onda plana -> aqui vive la dispersion numerica, comparable EXACTA con la formula de Yee) y C1b = 2D real (ny=nx, esponja en los cuatro bordes, fuente de columna finita -> aqui viven el reparto cilindrico y la dependencia espuria con L)
+instrumento: fotonica-monotile/fdtd2d_tm.py · sha16 4251c1e0119afc8b
+t_utc: 2026-10-12T05:57:38Z -> 2026-10-12T05:57:54Z
+umbral de planitud declarado: 0.05 · factor Q4: 3.0
+
+---- C1 · homogeneo eps_r = 1 (NO hay objeto) ----
+C1a · L = 24a · malla 384x1 · 2304 pasos · 0.03 s
+   riz(d=8a) = 0.000000   riz(d=16a) = 0.000000
+   reparto A(16a)/A(8a) = nan  (teorico 1.000000, desv max nan)
+   fase: error max = 3.331453e+00  ·  rama m = 1
+   cola de sonda (t > 0.75 T) = nan  ·  cola de dominio = nan
+C1a · L = 36a · malla 576x1 · 2304 pasos · 0.03 s
+   riz(d=8a) = 0.000000   riz(d=16a) = 0.000000
+   reparto A(16a)/A(8a) = nan  (teorico 1.000000, desv max nan)
+   fase: error max = 3.331453e+00  ·  rama m = 1
+   cola de sonda (t > 0.75 T) = nan  ·  cola de dominio = nan
+C1b · L = 24a · malla 384x384 · 2304 pasos · 3.19 s
+   riz(d=8a) = 0.489588   riz(d=16a) = 0.397919
+   reparto A(16a)/A(8a) = 1.029012  (teorico 0.707107, desv max 1.554830)
+   fase: error max = 8.693196e+01  ·  rama m = 1
+   cola de sonda (t > 0.75 T) = 9.844e-04  ·  cola de dominio = 1.097e-02
+C1b · L = 36a · malla 576x576 · 2304 pasos · 12.68 s
+   riz(d=8a) = 0.204434   riz(d=16a) = 0.291889
+   reparto A(16a)/A(8a) = 1.032537  (teorico 0.707107, desv max 0.878808)
+   fase: error max = 5.587232e+01  ·  rama m = 1
+   cola de sonda (t > 0.75 T) = 3.948e-02  ·  cola de dominio = 4.542e-02
+
+delta(C1a) = max_nu |ln A(36a) - ln A(24a)| = 0.000000
+delta(C1b) = max_nu |ln A(36a) - ln A(24a)| = 0.427568
+acompanante analitico Yee: error de fase max en la ventana = 1.463133e-03
+
+---- predicciones selladas en el pre-registro (§6.b) ----
+Q1 riz <= 0.05: ROJO
+Q2 delta <= 0.05: ROJO
+Q3 reparto (2D 0.7071 · 1D 1.0000) +- 0.05: ROJO
+Q4 fase medida 3.331e+00 <= 3 x Yee 1.463e-03 = 4.389e-03: ROJO
+
+---- ventana: nu · A_C1a(8a) · A_C1a(16a) · A_C1b(8a) · A_C1b(16a) ----
+  0.1527  0.000000e+00  0.000000e+00  7.583296e-01  1.715294e+00
+  0.1666  0.000000e+00  0.000000e+00  1.022927e+00  1.491530e+00
+  0.1805  0.000000e+00  0.000000e+00  1.061075e+00  1.222598e+00
+  0.1944  0.000000e+00  0.000000e+00  1.241837e+00  1.042007e+00
+  0.2082  0.000000e+00  0.000000e+00  1.556495e+00  9.670017e-01
+  0.2221  0.000000e+00  0.000000e+00  1.435316e+00  9.664396e-01
+  0.2360  0.000000e+00  0.000000e+00  1.625193e+00  9.318425e-01
+  0.2499  0.000000e+00  0.000000e+00  1.569858e+00  8.135786e-01
+  0.2638  0.000000e+00  0.000000e+00  1.310877e+00  8.501239e-01
+  0.2777  0.000000e+00  0.000000e+00  1.337603e+00  1.004973e+00
+  0.2915  0.000000e+00  0.000000e+00  1.051510e+00  1.176331e+00
+  0.3054  0.000000e+00  0.000000e+00  9.880544e-01  1.353327e+00
+  0.3193  0.000000e+00  0.000000e+00  1.037811e+00  1.436949e+00
+  0.3332  0.000000e+00  0.000000e+00  1.030792e+00  1.468906e+00
+  0.3471  0.000000e+00  0.000000e+00  1.285297e+00  1.517735e+00
+  0.3610  0.000000e+00  0.000000e+00  1.361968e+00  1.559970e+00
+  0.3748  0.000000e+00  0.000000e+00  1.450527e+00  1.571109e+00
+  0.3887  0.000000e+00  0.000000e+00  1.539093e+00  1.542628e+00
+  0.4026  0.000000e+00  0.000000e+00  1.467225e+00  1.516195e+00
+  0.4165  0.000000e+00  0.000000e+00  1.405154e+00  1.475259e+00
+  0.4304  0.000000e+00  0.000000e+00  1.328243e+00  1.398836e+00
+  0.4443  0.000000e+00  0.000000e+00  1.177726e+00  1.335169e+00
+  0.4581  0.000000e+00  0.000000e+00  1.119631e+00  1.240251e+00
+  0.4720  0.000000e+00  0.000000e+00  1.083680e+00  1.111564e+00
+  0.4859  0.000000e+00  0.000000e+00  1.089224e+00  1.044816e+00
+  0.4998  0.000000e+00  0.000000e+00  1.167515e+00  1.028106e+00
+  0.5137  0.000000e+00  0.000000e+00  1.235831e+00  1.027382e+00
+  0.5275  0.000000e+00  0.000000e+00  1.296269e+00  1.034493e+00
+  0.5414  0.000000e+00  0.000000e+00  1.359450e+00  1.035207e+00
