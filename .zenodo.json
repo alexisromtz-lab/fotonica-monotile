@@ -1,0 +1,31 @@
+{
+  "title": "fotonica-monotile: instrumento FDTD 2D TM y acto de contraste del monotilo Hat (Paso 2)",
+  "description": "<p>Instrumento de simulación <strong>FDTD</strong> (esquema Yee 2D, polarización TM) sellado por pre-registro, y su <strong>acto de contraste</strong> sobre la geometría del monotilo Hat.</p><p><strong>Instrumento declarado antes de correrlo</strong>: <code>dx = dy = a/16</code>; número de Courant <code>0.5</code>; esponja absorbente de 20 celdas por borde con perfil <code>borde^3</code> y <code>alfa = 0.30</code>; fuente gaussiana con <code>sigma = 0.5 a/c</code> y retardo <code>3 sigma</code>; sondas absolutas en <code>8a</code> y <code>16a</code>; ventana <code>nu ∈ [0.15, 0.55]</code> c/a; sub-corridas <strong>C1a</strong> (cuasi-1D) y <strong>C1b</strong> (2D real).</p><p><strong>Pieza C1, criterios Q1–Q4 en VERDE</strong> con valores medidos: Q1 riz <code>[C1a 0.005394 · C1b 0.005523]</code>; Q2 delta <code>[0.004548 · 0.006001]</code>; Q3 reparto <code>[C1a/24a 0.999907 · C1a/36a 1.000055 · C1b/24a 0.707449 · C1b/36a 0.707223]</code>; Q4 fase medida <code>1.405e-03</code> contra 3 veces el error de Yee <code>1.463133e-03</code>.</p><p><strong>Acto 3.2 — veredicto sellado <code>NEGATIVO / NULO SOSTENIDO</code> con <code>rc = 0</code></strong>: el contraste de la geometría (parche de nivel 2 rasterizado a <code>24a</code>, una celda de máscara = una celda de Yee, <code>N = 384</code>, contraste <code>4</code>, cinco semillas) contra la pieza C1 no distingue la correlación espacial del monotilo en transmisión a este régimen de contraste. La hipótesis queda refutada en este régimen y <strong>se publica como resultado, no como fracaso</strong>.</p><p><strong>Declarado, no adjudicado</strong>: 28 de los 29 bins cumplen la banda y el único que no la cumple es el <em>borde inferior de la ventana</em> (<code>nu = 0.152711</code>, diferencia <code>1.584702</code> contra banda <code>0.847124</code>); el propio crudo ya marca exactamente ese bin y su racha marcada es de <strong>1</strong> frente a los <strong>3</strong> bins consecutivos que el criterio exige, por lo que el veredicto se sostiene. Se declara además que el campo <code>riz_T_C1 = 0.05</code> es el techo del criterio Q1 y no el riz medido (<code>0.005523</code>), y que el <code>git_head</code> del crudo (<code>7ffbcfa</code>) es anterior al <code>HEAD</code> del árbol al cerrar el empaque.</p>",
+  "creators": [
+    {
+      "name": "Roman Martinez, Jose Alexis",
+      "affiliation": "alexisromtz-lab"
+    }
+  ],
+  "keywords": [
+    "monotile Hat",
+    "aperiodicidad",
+    "FDTD",
+    "Yee 2D TM",
+    "metrología A2.1",
+    "contraste dieléctrico"
+  ],
+  "license": "MIT",
+  "upload_type": "software",
+  "access_right": "open",
+  "publication_date": "2026-10-12",
+  "version": "0.1.0",
+  "language": "spa",
+  "related_identifiers": [
+    {
+      "relation": "isSourceOf",
+      "identifier": "https://github.com/alexisromtz-lab/acustica-monotile",
+      "scheme": "url"
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+# fotonica-monotile — Citación canónica (CITATION.cff, esquema CFF 1.2.0).
+#
+# Por qué existe. Sin metadatos legibles por máquina, un recolector automático
+# —Zenodo incluido— toma el LOGIN de la cuenta como autor. Este archivo declara
+# la autoría física, alineada con la identidad que el propio commit firma.
+#
+# Dos lecciones ya pagadas, aplicadas aquí:
+#   (1) `license` viaja como CADENA ESCALAR. En el repositorio hermano
+#       `protocol-core` este campo se puso en LISTA para que el DOI naciera dual,
+#       y el lector de Zenodo rechazó el paquete entero con `Not a valid string.`
+#   (2) `version` y `date-released` van entre comillas: el cargador YAML los
+#       convertiría en número y en fecha, y el esquema los pide como cadena.
+#
+# Este archivo no contiene ningún signo monetario, y se lo nombra en vez de
+# citarlo: un signo monetario es un patrón para quien edite por sustitución, no
+# un carácter. No se declara ORCID: no existe ninguno en este ecosistema.
+cff-version: 1.2.0
+message: "Si usa este software, sus crudos o su geometría, cite el artefacto como se indica."
+title: "fotonica-monotile: instrumento FDTD 2D TM y acto de contraste del monotilo Hat (Paso 2)"
+abstract: "Instrumento de simulación FDTD (esquema Yee 2D, polarización TM) sellado por pre-registro y su acto de contraste sobre la geometría del monotilo Hat. El pre-registro fija el instrumento antes de correrlo: dx = dy = a/16, número de Courant 0.5, esponja absorbente de 20 celdas por borde con perfil borde al cubo y alfa 0.30, fuente gaussiana con sigma 0.5 a/c y retardo 3 sigma, sondas absolutas en 8a y 16a, y ventana de frecuencias nu en [0.15, 0.55] c/a en las dos sub-corridas, C1a cuasi-1D y C1b 2D real. Los cuatro criterios de la pieza salen VERDE con valores medidos: Q1 riz (C1a 0.005394, C1b 0.005523), Q2 delta (0.004548, 0.006001), Q3 reparto (C1a/24a 0.999907, C1a/36a 1.000055, C1b/24a 0.707449, C1b/36a 0.707223) y Q4 fase medida 1.405e-03 contra 3 veces el error de Yee 1.463133e-03. El acto 3.2 contrasta la geometría (parche de nivel 2 rasterizado a 24a, una celda de máscara = una celda de Yee, N 384, contraste 4, cinco semillas) contra la pieza C1 y sella el veredicto NEGATIVO / NULO SOSTENIDO con rc 0: la hipótesis de que la correlación espacial del monotilo se distinga en transmisión queda refutada en este régimen de contraste. Se publica como resultado, no como fracaso. Queda declarado sin adjudicar que 28 de los 29 bins cumplen la banda y el único que no la cumple es el borde inferior de la ventana (nu 0.152711, diferencia 1.584702 contra banda 0.847124), bin que el propio crudo ya marca y cuya racha marcada es de 1 frente a los 3 bins consecutivos que el criterio exige."
+version: "0.1.0"
+date-released: "2026-10-12"
+authors:
+  - family-names: "Roman Martinez"
+    given-names: "Jose Alexis"
+    alias: "alexisromtz"
+    affiliation: "alexisromtz-lab"
+license: MIT
+keywords:
+  - "monotile Hat"
+  - "aperiodicidad"
+  - "FDTD"
+  - "Yee 2D TM"
+  - "metrología A2.1"
+  - "contraste dieléctrico"
+repository-code: "https://github.com/alexisromtz-lab/fotonica-monotile"
