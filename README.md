@@ -76,6 +76,19 @@ Dos advertencias de lectura, declaradas:
 1. **El campo llamado `cumple` guarda la NEGACIÓN del criterio.** Medido: `len(campo) = 29`, `sum(campo) = 1`, índices `True` = `[0]`; derivado `abs(dif) <= banda` da `28` verdaderos con índice `False` = `[0]`; y `campo == NOT derivado` → `True`. Es decir: el array marca el bin que **falla**, y es lo que consumen `rachas`/`racha_mas_larga`. Leído literalmente, §4.2 queda en contradicción con §4.1 (`28 de 29` cumplen); leído como negación, ambas coinciden. **No se edita §4: se declara aquí.** El veredicto no cambia (`1 < 3`).
 2. **Identidad de árbol del acto 3.2:** el crudo registra `git_head = 7ffbcfa` y el `HEAD` actual de este repositorio es otro; ya está declarado en §4.4 y no se re-deriva aquí.
 
+<!-- HUELLA-A21-STANDARD-README-FOTONICA-20261013 -->
+
+## Epistemology & Rigor (The A2.1 Standard)
+
+> This repository operates under strict pre-registration. No parameters are tuned to fit the data post-execution. Analytical predictions (such as the 3σ bounding for stochastic noise) are sealed before running. Red/Null results are preserved and declared, guaranteeing immunity to confirmation bias and making the code entirely verifiable by both human auditors and AI agents.
+
+Los tres axiomas del estándar, cada uno con su anclaje medido en esta casa:
+
+1. **Predicción antes del motor.** El pre-registro (`PREREGISTRO_INSTRUMENTO_FDTD_20261012.md`, blob `23496c0592fa32c9e2ff7a9e4d5f59a6bf88a22b`) se sella a `T_UTC 2026-10-12T05:49Z` (l.4) con los cuatro criterios y sus umbrales (l.193–198, `cero figuras vistas`); la primera corrida es posterior (`055738Z`): el umbral es anterior a la salida, no se elige mirándola.
+2. **El rojo se conserva.** La primera corrida salió **ROJO x4** y vive en el repositorio con su commit: `crudos/crudo_C1_20261012T055738Z.txt:33–36`, commit `92834c4`, inscrita en el libro del pre-registro (l.260, `t > 0.75 T`). Lo que la volteó fue **el instrumento** —absorbedor tipo esponja y fila `j=0` inerte, declaradas en `fdtd2d_tm.py:58`—, nunca el umbral.
+3. **Anclaje sin institución.** Sello Zenodo `10.5281/zenodo.23329943` (concepto `…23329942`) y sello del instrumento `14bc745` (`v0.1.0`): identidad y re-ejecutabilidad verificables por cualquiera —persona o agente— sin institución en medio. El anclaje no certifica corrección: certifica identidad y re-ejecutabilidad.
+
+
 ## Cómo citar (BibTeX)
 
 ```bibtex
