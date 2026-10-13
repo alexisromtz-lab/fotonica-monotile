@@ -1,4 +1,19 @@
+<!-- HUELLA-README-FOTONICA-MONOTILE-20261013 -->
+
 # fotonica-monotile — Instrumento FDTD 2D TM y acto de contraste del monotilo Hat
+
+[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.23329943-blue)](https://doi.org/10.5281/zenodo.23329943)
+[![Licencia: MIT](https://img.shields.io/badge/licencia-MIT-green)](LICENSE)
+[![Motor](https://img.shields.io/badge/motor-python%203.14.7%20%C2%B7%20numpy%202.4.6-blue)](PREREGISTRO_INSTRUMENTO_FDTD_20261012.md)
+[![Criterios Q1..Q4](https://img.shields.io/badge/Q1--Q4-VERDE-brightgreen)](crudos/crudo_C1_20261012T062648Z.json)
+[![Acto 3.2](https://img.shields.io/badge/acto%203.2-NEGATIVO%20%2F%20NULO%20SOSTENIDO-lightgrey)](crudos/crudo_acto3_20261012T205230Z.json)
+
+**Gancho.** Instrumento FDTD 2D TM (esquema Yee) y su acto de contraste del monotilo Hat: la pieza publica su piso de ruido como cota (Q1..Q4 VERDE) y su contraste como **resultado negativo** — `NEGATIVO / NULO SOSTENIDO` — sostenido por `28 de 29` bins dentro de la banda `3 sigma + riz` y una racha de fallo de `1` contra `3` exigidos. Este repositorio es la **pieza fuente** del enlace que consume `acustica-monotile`.
+
+*2D TM Yee-FDTD instrument and its Hat-monotile contrast act: the piece publishes its noise floor as a bound (Q1..Q4 GREEN) and its contrast as a **negative result** — `NEGATIVE / SUSTAINED NULL` — held by `28 of 29` bins inside the `3 sigma + riz` band and a failure run of `1` against `3` required. This repository is the **source piece** of the link consumed by `acustica-monotile`.*
+
+**Nota sobre las insignias.** Cada insignia apunta a su artefacto. La de motor cita la firma **declarada** del entorno (`PREREGISTRO_INSTRUMENTO_FDTD_20261012.md`, §"Motor": `numpy 2.4.6` · `python 3.14.7` · unidad de conteo = celda), no una promesa de compatibilidad. **No se acuña insignia de orden de convergencia en `p`**: este repositorio no declara `p = 2` ni una escalera de convergencia medida (búsqueda de `segundo orden`, `orden 2`, `O(h^2)` en el pre-registro: **0** líneas). La insignia `Q1..Q4-VERDE` la respalda el crudo `crudos/crudo_C1_20261012T062648Z.json` (campos `Q1_riz_ok`, `Q2_delta_ok`, `Q3_reparto_ok`, `Q4_fase_ok` = `True`); la del acto 3.2, `crudos/crudo_acto3_20261012T205230Z.json` (campo `veredicto`).
+
 
 Instrumento de simulación por diferencias finitas en el dominio del tiempo (FDTD, esquema Yee
 2D polarización TM) y su **acto de contraste** sobre la geometría del monotilo Hat. Este
@@ -10,6 +25,75 @@ cita con su artefacto, su unidad y su hora.
 
 ---
 
+## Inicio rápido (15 s)
+
+Solo biblioteca estándar: se **lee** el crudo sellado, no se corre FDTD (una corrida completa tarda minutos y vive en §6).
+
+```sh
+git clone https://github.com/alexisromtz-lab/fotonica-monotile.git
+cd fotonica-monotile
+python3 -B - <<'PY'
+import json
+d = json.load(open('crudos/crudo_acto3_20261012T205230Z.json'))
+viola = [abs(x) > b for x, b in zip(d['dif'], d['banda'])]
+print('UT_HORA=%s  rc=%s' % (d['t_utc'], d['rc']))
+print('bins_que_cumplen=%d de %d  racha_mas_larga=%d  exigidos=%d  veredicto=%s'
+      % (len(viola) - sum(viola), len(viola), d['racha_mas_larga'],
+         d['criterio']['bins_consecutivos'], d['veredicto']))
+PY
+```
+
+Salida (verbatim, medida el `2026-10-13`):
+
+```text
+UT_HORA=2026-10-12T20:52:30Z  rc=0
+bins_que_cumplen=28 de 29  racha_mas_larga=1  exigidos=3  veredicto=NEGATIVO / NULO SOSTENIDO
+```
+
+Notas de instrumento declaradas: los scripts de esta pieza viven en la **raíz** del repositorio (`malla_hat.py`, `fdtd2d_tm.py`, `inyector_diel.py`); el directorio `sim/` está **vacío** y **`sim/run_c1.py` no existe** aquí (**0** hallazgos en el árbol). Los comandos de corrida completa, con sus banderas, están en §6.
+
+## Resultados medidos
+
+UNIVERSO DECLARADO: los dos crudos sellados de `crudos/` (`crudo_C1_20261012T062648Z.json` · `crudo_acto3_20261012T205230Z.json`), leídos con `json` de la biblioteca estándar; unidad de conteo = celda; hora de cada cifra = la del crudo que la contiene. Ventana espectral `nu ∈ [0.15, 0.55]` c/a, 29 bins.
+
+| Criterio | Medido | Umbral | Clase |
+|---|---|---|---|
+| Q1 · riz del reparto, peor caso por modo (`riz_reparto_por_modo`) | C1a `0.005394` · C1b `0.005523` | `0.05` | VERDE |
+| Q2 · `delta_lnA_36_vs_24` (el borde lejano no cambia la medida) | C1a `0.004548` · C1b `0.006001` | `0.05` | VERDE |
+| Q3 · `A(16a)/A(8a)` (`reparto_media`) · C1a, `L = 24 a` | `0.999907` (teórico `1.000000`) | en `C1a` el teórico es `1.000` | VERDE |
+| Q3 · `A(16a)/A(8a)` · C1a, `L = 36 a` | `1.000055` | teórico `1.000` | VERDE |
+| Q3 · `A(16a)/A(8a)` · C1b, `L = 24 a` | `0.707449` (teórico `0.707107`) | `0.7071 ± 0.05` | VERDE |
+| Q3 · `A(16a)/A(8a)` · C1b, `L = 36 a` | `0.707223` | `0.7071 ± 0.05` | VERDE |
+| Q4 · `fase_error_max_C1a` | `1.405e-03` | `3 × yee_error_fase_max_ventana` = `4.389e-03` (rama `m = 1`) | VERDE |
+| Acto 3.2 · bins que cumplen la banda `3 sigma + riz` | `28 de 29` (falla el bin `nu = 0.1527114967462039`) | `29` | 1 bin fuera |
+| Acto 3.2 · `racha_mas_larga` | `1` | `>= 3` (`bins_consecutivos`) | NULO |
+| Acto 3.2 · `veredicto` (campo del crudo) | `NEGATIVO / NULO SOSTENIDO` | — | `rc 0` |
+
+Lectura acotada a lo medido: los cuatro criterios de entrada (`Q1_riz_ok`, `Q2_delta_ok`, `Q3_reparto_ok`, `Q4_fase_ok`) están en `True` en el crudo de C1 y el acto 3.2 **no** se declara verde: `28 de 29` bins caen dentro de la banda declarada antes de medir (`k_sigma = 3.0`, `riz_T_C1 = 0.05`) y la racha más larga de incumplimiento es `1`, contra `3` consecutivos exigidos. El bin que falla es `nu = 0.1527114967462039` (`|dif| = 1.584702` contra banda `0.847124`). El veredicto del crudo es `NEGATIVO / NULO SOSTENIDO` y se publica como resultado.
+
+Dos advertencias de lectura, declaradas:
+
+1. **El campo llamado `cumple` guarda la NEGACIÓN del criterio.** Medido: `len(campo) = 29`, `sum(campo) = 1`, índices `True` = `[0]`; derivado `abs(dif) <= banda` da `28` verdaderos con índice `False` = `[0]`; y `campo == NOT derivado` → `True`. Es decir: el array marca el bin que **falla**, y es lo que consumen `rachas`/`racha_mas_larga`. Leído literalmente, §4.2 queda en contradicción con §4.1 (`28 de 29` cumplen); leído como negación, ambas coinciden. **No se edita §4: se declara aquí.** El veredicto no cambia (`1 < 3`).
+2. **Identidad de árbol del acto 3.2:** el crudo registra `git_head = 7ffbcfa` y el `HEAD` actual de este repositorio es otro; ya está declarado en §4.4 y no se re-deriva aquí.
+
+## Cómo citar (BibTeX)
+
+```bibtex
+@software{roman_martinez_fotonica_monotile_2026,
+  author   = {Roman Martinez, Jose Alexis},
+  title    = {fotonica-monotile: instrumento FDTD 2D TM y acto de contraste del monotilo Hat (Paso 2)},
+  year     = {2026},
+  version  = {0.1.0},
+  doi      = {10.5281/zenodo.23329943},
+  url      = {https://github.com/alexisromtz-lab/fotonica-monotile},
+  license  = {MIT},
+  keywords = {monotile Hat, aperiodicidad, FDTD, Yee 2D TM, metrologia A2.1, contraste dielectrico}
+}
+```
+
+El título del `@software` es el de `CITATION.cff` (verbatim). **No se declara ORCID: no existe ninguno en este ecosistema.** DOI de concepto (todas las versiones): `10.5281/zenodo.23329942`.
+
+---
 ## 1. El instrumento y su pre-registro sellado
 
 `PREREGISTRO_INSTRUMENTO_FDTD_20261012.md` — sellado en `T_UTC 2026-10-12T05:49Z`. Declara el
