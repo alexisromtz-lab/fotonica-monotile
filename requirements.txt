@@ -1,0 +1,6 @@
+# HUELLA-CENSO-PYTEST-PLANTILLA-DECLARACIONES-20261020
+# pytest es dependencia del APARATO (collector + junitxml), no del runtime:
+# el runner lo instalaba a ciegas y aqui queda declarado.
+# numpy NO se declara todavia: el runner lo trae y su version no esta medida
+# (declararlo a ciegas mueve los ultimos digitos, no el veredicto).
+pytest>=8,<10
