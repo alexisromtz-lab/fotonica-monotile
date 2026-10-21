@@ -8,6 +8,7 @@
       "afirma": "28 de 29",
       "dato": "crudos/crudo_acto3_20261012T205230Z.json",
       "deriva": "sum(dato.cumple)",
+      "modo": "derivacion",
       "polaridad": "complemento",
       "total": "len(dato.cumple)",
       "prosa": "README.md"
