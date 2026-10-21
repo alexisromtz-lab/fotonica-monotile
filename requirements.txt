@@ -1,6 +1,12 @@
 # HUELLA-CENSO-PYTEST-PLANTILLA-DECLARACIONES-20261020
 # pytest es dependencia del APARATO (collector + junitxml), no del runtime:
 # el runner lo instalaba a ciegas y aqui queda declarado.
-# numpy NO se declara todavia: el runner lo trae y su version no esta medida
-# (declararlo a ciegas mueve los ultimos digitos, no el veredicto).
+# HUELLA-EJECUTOR-SIM-FOTONICA-20261020
+# numpy es dependencia de `malla_hat.py` (rasteriza la red dielectrica), que
+# ahora se EJECUTA en `tests/test_sim_executor.py`. La nota anterior ("el runner
+# lo trae") quedo medida falsa: la imagen ubuntu-24.04 no trae numpy
+# (ModuleNotFoundError, run 39547942974) y desde la v10 el runner instala solo
+# lo que el manifiesto declara. Piso 2.0 por los alias retirados en numpy 2.0;
+# techo 3.0 para no admitir una siguiente mayor sin medirla.
 pytest>=8,<10
+numpy>=2.0,<3.0
