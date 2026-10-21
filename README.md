@@ -248,3 +248,4 @@ máquina, el `.txt` su impresión para lectura humana.
 - Licencia: **MIT** (ver `LICENSE`); la elección se declara en `CITATION.cff`.
 - Repositorio hermano: [`acustica-monotile`](https://github.com/alexisromtz-lab/acustica-monotile)
   — el enlace que consume esta geometría.
+- Geometría: commit `b498fcf` — el mismo que cita `acustica-monotile`; el `sha16` del generador `malla_hat.py` está sellado en la tabla de §6. <!-- HUELLA-GEOM-BILATERAL-FOTONICA-20261020 -->
