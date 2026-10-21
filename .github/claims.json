@@ -2,6 +2,9 @@
   "huella": "HUELLA-CLAIMS-FOTONICA-MONOTILE-20261020",
   "repo": "fotonica-monotile",
   "clase": "A",
+  "datos": {
+    "crudos/crudo_acto3_20261012T205230Z.json": "b22ffd5e1d0bde08"
+  },
   "claims": [
     {
       "id": "ACT3_2_bins_que_cumplen",
