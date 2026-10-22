@@ -1,8 +1,9 @@
-# HUELLA-APPARATUS-FOTONICA-COMPUESTO-20261020
-# Modo compuesto (ley v7): el aparato mide DOS cosas y el certificado cubre las
-# dos. verify_manifest.py firma el manifiesto (MANIFIESTO_SANO: N, entero > 0) y
-# pytest firma la ejecucion de los tests (instrumento junitxml, se cuentan los
-# <testcase> del informe, no el texto del runner).
-comando: python .github/verify_manifest.py && python -m pytest -q tests --junitxml=/tmp/junit.xml
-mide: manifiesto+tests
-evidencia: MANIFIESTO_SANO: [0-9]+; junitxml
+# HUELLA-CI-APPARATUS-FOTONICA-TESTS-20261022
+# Contrato v10: el aparato mide UNA cosa. El modo compuesto encadenaba
+# `.github/verify_manifest.py` delante de pytest; ese manifiesto solo comprueba
+# que los ficheros existen, parsean y compilan — un testigo pasivo que el banco
+# semantico (Q1..Q4, reparto, regresion de cifras) ya cubre con creces. Retirado:
+# un verde que no puede fallar por la razon que importa no es evidencia.
+comando: python -m pytest -q tests --junitxml=/tmp/junit.xml
+mide: tests
+evidencia: junitxml
