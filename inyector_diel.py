@@ -31,7 +31,7 @@ máscara sea el eje x del dominio (dirección de propagación). Sin la
 transposición la muestra queda reflejada respecto de y = x: otro objeto.
 
 Lo que este módulo NO hace (§9.7): no construye el nivel 3, ni U3 (hexagonal
-periódica), ni C2 (Penrose); no toca `/Users/marlene/sfqed-paper`; no instala ni
+periódica), ni C2 (Penrose); no toca el repo local de sfqed-paper; no instala ni
 deposita tarballs; no toca el registro de Zenodo. No introduce ningún parámetro
 nuevo: todo lo que usa está sellado en §9/§9.8 y se cita con su llave.
 """
